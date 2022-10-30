@@ -1,5 +1,6 @@
 import { FC, PropsWithChildren, ReactNode } from 'react';
 import { AppProps } from 'next/app';
+import { Analytics } from '@vercel/analytics/react';
 
 import '@/styles/global.css';
 
@@ -17,6 +18,7 @@ export default function MyApp({ Component, pageProps }: AppWithLayoutProps) {
   return (
     <Layout>
       <Component {...pageProps} />
+      <Analytics />
     </Layout>
   );
 }
