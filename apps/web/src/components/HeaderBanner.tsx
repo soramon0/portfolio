@@ -1,4 +1,4 @@
-import { MegaphoneIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { MegaphoneIcon } from '@heroicons/react/24/outline';
 
 function HeaderBanner() {
   return (
