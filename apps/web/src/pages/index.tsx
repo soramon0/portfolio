@@ -5,6 +5,10 @@ function HomePage() {
     <>
       <Head>
         <title>Home</title>
+        <meta
+          name='description'
+          content="sora.mon0's full stack portfolio website"
+        />
       </Head>
 
       <main className='h-screen mx-auto max-w-8xl flex items-center justify-center'>
