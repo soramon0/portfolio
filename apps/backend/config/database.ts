@@ -1,11 +1,18 @@
 import path from 'path';
 
-export default ({ env }) => ({
+const configure = ({ env }) => ({
   connection: {
     client: 'sqlite',
     connection: {
-      filename: path.join(__dirname, '..', '..', env('DATABASE_FILENAME', '.tmp/data.db')),
+      filename: path.join(
+        __dirname,
+        '..',
+        '..',
+        env('DATABASE_FILENAME', '.tmp/data.db')
+      ),
     },
     useNullAsDefault: true,
   },
 });
+
+export default configure;

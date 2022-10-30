@@ -1,4 +1,4 @@
-export default ({ env }) => ({
+const configure = ({ env }) => ({
   auth: {
     secret: env('ADMIN_JWT_SECRET'),
   },
@@ -6,3 +6,5 @@ export default ({ env }) => ({
     salt: env('API_TOKEN_SALT'),
   },
 });
+
+export default configure;
