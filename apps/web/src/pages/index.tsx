@@ -6,7 +6,7 @@ function HomePage() {
   return (
     <>
       <Head>
-        <title>Home</title>
+        <title>sora.mon0 | Home</title>
         <meta
           name="description"
           content="sora.mon0's full stack portfolio website"
