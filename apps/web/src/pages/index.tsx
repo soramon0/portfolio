@@ -1,5 +1,7 @@
 import Head from 'next/head';
 
+import { HeaderBanner } from '@/components';
+
 function HomePage() {
   return (
     <>
@@ -11,9 +13,10 @@ function HomePage() {
         />
       </Head>
 
+      <HeaderBanner />
       <main className="h-screen mx-auto max-w-8xl flex items-center justify-center">
         <h1 className="text-4xl leading-snug font-display font-bold text-slate-800 md:text-5xl lg:text-6xl">
-          Coming <span className="text-green-600">Soon!</span>
+          Fullstack <span className="text-indigo-600">Developer!</span>
         </h1>
       </main>
     </>
