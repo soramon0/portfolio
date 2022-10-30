@@ -1,4 +1,6 @@
-export default {
+/* eslint-disable @typescript-eslint/no-empty-function */
+
+const config = {
   /**
    * An asynchronous register function that runs before
    * your application is initialized.
@@ -16,3 +18,5 @@ export default {
    */
   bootstrap(/*{ strapi }*/) {},
 };
+
+export default config;
