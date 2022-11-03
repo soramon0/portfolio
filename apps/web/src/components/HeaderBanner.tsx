@@ -22,7 +22,11 @@ function HeaderBanner() {
               </span>
             </p>
           </div>
-          <a href="https://github.com/soramon0" target="_blank">
+          <a
+            href="https://github.com/soramon0"
+            target="_blank"
+            rel="noreferrer"
+          >
             <IconGithub className="w-6 h-6 text-white" />
             <span className="sr-only">View Github profile</span>
           </a>
