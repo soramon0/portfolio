@@ -16,7 +16,7 @@ function HomePage() {
       <main className="h-screen">
         <HeaderBanner />
 
-        <section className="h-5/6 mx-auto max-w-8xl flex items-center justify-center">
+        <section className="relative px-4 h-5/6 mx-auto max-w-8xl flex items-center justify-center">
           <h1 className="text-3xl leading-snug font-display font-bold text-slate-800 sm:text-4xl md:text-5xl lg:text-6xl">
             Fullstack <span className="text-indigo-600">Developer</span>
           </h1>

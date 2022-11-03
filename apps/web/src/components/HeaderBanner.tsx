@@ -1,5 +1,7 @@
 import { MegaphoneIcon } from '@heroicons/react/24/outline';
 
+import IconGithub from './IconGithub';
+
 function HeaderBanner() {
   return (
     <div className="bg-indigo-600">
@@ -12,6 +14,7 @@ function HeaderBanner() {
                 aria-hidden="true"
               />
             </span>
+
             <p className="ml-3 truncate font-medium text-white">
               <span className="md:hidden">launching new portfolio!</span>
               <span className="hidden md:inline">
@@ -19,6 +22,10 @@ function HeaderBanner() {
               </span>
             </p>
           </div>
+          <a href="https://github.com/soramon0" target="_blank">
+            <IconGithub className="w-6 h-6 text-white" />
+            <span className="sr-only">View Github profile</span>
+          </a>
         </div>
       </div>
     </div>
