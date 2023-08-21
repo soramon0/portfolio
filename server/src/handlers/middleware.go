@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
@@ -15,7 +14,5 @@ func fiberMiddleware(a *fiber.App) {
 		recover.New(),
 		// Add CORS to each route.
 		cors.New(),
-		// Add simple logger.
-		logger.New(),
 	)
 }

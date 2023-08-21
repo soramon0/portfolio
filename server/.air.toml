@@ -8,7 +8,7 @@ tmp_dir = "tmp"
   cmd = "go build -o ./tmp/main ."
   # It's not necessary to trigger build each time file changes if it's too frequent.
   delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "src/template/node_modules", "src/template/dist", "bin"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
