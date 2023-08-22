@@ -1,10 +1,11 @@
 
 
-providers = []
+providers = ['go', 'node']
 
 [variables]
 CGO_ENABLED = '0'
 NIXPACKS_METADATA = 'go'
+NIXPACKS_NODE_VERSION="18"
 [phases.build]
 dependsOn = ['install','setup']
 cmds = [
