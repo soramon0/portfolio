@@ -24,7 +24,9 @@ cmds = [
 cacheDirectories = ['/root/.cache/go-build']
 
 [phases.setup]
-nixPkgs = ['go', 'node', 'pnpm']
+nixPkgs = ['go'
+ #, 'node', 'pnpm'
+]
 nixOverlays = []
 
 [start]
