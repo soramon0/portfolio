@@ -9,7 +9,7 @@ NIXPACKS_NODE_VERSION="18"
 [phases.build]
 dependsOn = ['install','setup']
 cmds = [
-    # 'pnpm run -C ./src/template build',
+    'npm run --prefix ./src/template build',
     'go build -o bin/portfolio'
 ]
 cacheDirectories = ['/root/.cache/go-build']
@@ -18,16 +18,12 @@ cacheDirectories = ['/root/.cache/go-build']
 dependsOn = ['setup']
 cmds = [
     'go mod download',
-    'go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest',
-    'go install github.com/pressly/goose/v3/cmd/goose@latest',
-    # 'pnpm install -C ./src/template'
+    'npm install --prefix ./src/template'
 ]
 cacheDirectories = ['/root/.cache/go-build']
 
 [phases.setup]
-nixPkgs = ['go'
- #, 'node', 'pnpm'
-]
+nixPkgs = ['go']
 nixOverlays = []
 
 [start]
