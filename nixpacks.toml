@@ -7,16 +7,24 @@ CGO_ENABLED = '0'
 NIXPACKS_METADATA = 'go'
 [phases.build]
 dependsOn = ['install','setup']
-cmds = ['make all']
+cmds = [
+    'pnpm run -C ./src/template build',
+    'go build -o bin/portfolio'
+]
 cacheDirectories = ['/root/.cache/go-build']
 
 [phases.install]
 dependsOn = ['setup']
-cmds = ['go mod download', 'make go-prepare', 'make install-web-dependencies']
+cmds = [
+    'go mod download',
+    'go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest',
+    'go install github.com/pressly/goose/v3/cmd/goose@latest',
+    'pnpm install -C ./src/template'
+]
 cacheDirectories = ['/root/.cache/go-build']
 
 [phases.setup]
-nixPkgs = ['go', 'node', 'pnpm', 'make']
+nixPkgs = ['go', 'node', 'pnpm']
 nixOverlays = []
 
 [start]
