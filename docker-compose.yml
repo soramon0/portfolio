@@ -12,6 +12,21 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
       POSTGRES_DB: dev_db
+  cache:
+    image: redis:7.2
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    volumes:
+      - portfoliocache:/data
+
+  cache-ui:
+    image: redislabs/redisinsight
+    restart: unless-stopped
+    ports:
+      - 8001:8001
+    volumes:
+      - redisinsight:/db
 
   adminer:
     image: adminer
@@ -21,3 +36,6 @@ services:
 
 volumes:
   portfoliodb:
+  portfoliocache:
+  redisinsight:
+

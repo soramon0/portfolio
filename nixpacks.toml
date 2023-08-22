@@ -1,0 +1,31 @@
+
+
+providers = ['go', 'node']
+
+[variables]
+CGO_ENABLED = '0'
+NIXPACKS_METADATA = 'go'
+NIXPACKS_NODE_VERSION="18"
+[phases.build]
+dependsOn = ['install','setup']
+cmds = [
+    'npm run --prefix ./src/template build',
+    'go build -o bin/portfolio'
+]
+cacheDirectories = ['/root/.cache/go-build']
+
+[phases.install]
+dependsOn = ['setup']
+cmds = [
+    'go mod download',
+    'npm install --prefix ./src/template'
+]
+cacheDirectories = ['/root/.cache/go-build']
+
+[phases.setup]
+nixPkgs = ['go']
+nixOverlays = []
+
+[start]
+cmd = './bin/portfolio'
+runImage = 'ubuntu:jammy'

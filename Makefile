@@ -1,4 +1,4 @@
-.PHONY: all info go-build svelte-build install-web-dependencies clean
+.PHONY: all info go-build go-prepare go-dev svelte-build svelete-dev install-web-dependencies clean
 
 info:
 	$(info ------------------------------------------)
@@ -14,6 +14,10 @@ info:
 	$(info Usage: make <command>)
 
 all: svelte-build go-build
+
+go-prepare:
+	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+	@go install github.com/pressly/goose/v3/cmd/goose@latest
 
 go-build:
 	@echo "=== Building Protfolio Project ==="
