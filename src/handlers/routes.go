@@ -9,7 +9,7 @@ import (
 	"github.com/soramon0/portfolio/src/template"
 )
 
-func Register(a *fiber.App, db *database.Queries, l *lib.AppLogger) {
+func Register(a *fiber.App, db *database.Queries, vt *lib.ValidatorTranslator, l *lib.AppLogger) {
 	fiberMiddleware(a)
 
 	apiRoutes := a.Group("/api").Use(logger.New())
@@ -18,10 +18,21 @@ func Register(a *fiber.App, db *database.Queries, l *lib.AppLogger) {
 	})
 
 	v1Router := apiRoutes.Group("/v1")
+
+	authHandlers := NewAuth(db, vt, l)
+	authRouter := v1Router.Group("/auth")
+	authRouter.Post("/register", authHandlers.Register)
+
 	usersHandlers := NewUsers(db, l)
 	usersRouter := v1Router.Group("/users")
 	usersRouter.Get("/", usersHandlers.GetUsers)
 	usersRouter.Get("/:id", usersHandlers.GetUserById)
+
+	apiRoutes.Use(
+		func(c *fiber.Ctx) error {
+			return &fiber.Error{Code: fiber.StatusNotFound, Message: "Maybe you are lost"}
+		},
+	)
 
 	// Serve static files
 	a.All("/*", filesystem.New(filesystem.Config{
@@ -29,10 +40,4 @@ func Register(a *fiber.App, db *database.Queries, l *lib.AppLogger) {
 		NotFoundFile: "index.html",
 		Index:        "index.html",
 	}))
-
-	a.Use(
-		func(c *fiber.Ctx) error {
-			return &fiber.Error{Code: fiber.StatusNotFound, Message: "Maybe you are lost"}
-		},
-	)
 }
