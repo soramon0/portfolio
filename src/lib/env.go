@@ -20,9 +20,9 @@ func GetDatabaseURL() string {
 }
 
 func GetServerBindAddress() string {
-	host, err := checkEnv("SERVER_HOST")
+	host, err := checkEnv("HOST")
 	Must(err)
-	port, err := checkEnv("SERVER_PORT")
+	port, err := checkEnv("PORT")
 	Must(err)
 
 	return fmt.Sprintf("%s:%s", host, port)
