@@ -1,12 +1,24 @@
 
-[phases.setup]
-nixPkgs = ['...', 'node', 'pnpm', 'go', 'make']
+
+providers = []
+
+[variables]
+CGO_ENABLED = '0'
+NIXPACKS_METADATA = 'go'
+[phases.build]
+dependsOn = ['install','setup']
+cmds = ['make all']
+cacheDirectories = ['/root/.cache/go-build']
 
 [phases.install]
+dependsOn = ['setup']
 cmds = ['go mod download', 'make go-prepare', 'make install-web-dependencies']
+cacheDirectories = ['/root/.cache/go-build']
 
-[phases.build]
-cmds = ['make all']
+[phases.setup]
+nixPkgs = ['go', 'node', 'pnpm', 'make']
+nixOverlays = []
 
 [start]
 cmd = './bin/portfolio'
+runImage = 'ubuntu:jammy'
