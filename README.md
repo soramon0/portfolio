@@ -25,5 +25,5 @@ Go server that powers my portfolio website.
 - Run migrations
   - `make migrate-up`
 - Run app with hot reload or in production
-  - `make develop`
+  - `make go-dev`
   - `make start`
