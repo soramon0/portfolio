@@ -19,6 +19,12 @@ func GetDatabaseURL() string {
 	return url
 }
 
+func GetTokenSecret() string {
+	secret, err := checkEnv("TOKEN_SECRET")
+	Must(err)
+	return secret
+}
+
 func GetServerBindAddress() string {
 	host, err := checkEnv("HOST")
 	Must(err)

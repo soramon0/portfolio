@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/goombaio/namegenerator"
 	"github.com/soramon0/portfolio/src/internal/database"
@@ -30,13 +32,13 @@ func NewAuth(db *database.Queries, vt *lib.ValidatorTranslator, l *lib.AppLogger
 	}
 }
 
-type registerPayload struct {
+type authPayload struct {
 	Email    string `json:"email" validate:"required,email,omitempty"`
 	Password string `json:"password" validate:"required,omitempty"`
 }
 
 func (a *Auth) Register(c *fiber.Ctx) error {
-	payload := new(registerPayload)
+	payload := new(authPayload)
 	if err := c.BodyParser(payload); err != nil {
 		a.log.ErrorF("failed body valdiation %v\n", err)
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid credentials"}
@@ -98,6 +100,61 @@ func (a *Auth) Register(c *fiber.Ctx) error {
 		a.log.ErrorF("failed creating user: %v\n", err)
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "registration failed"}
 	}
+
+	return c.JSON(types.NewAPIResponse(user))
+}
+
+func (a *Auth) Login(c *fiber.Ctx) error {
+	payload := new(authPayload)
+	if err := c.BodyParser(payload); err != nil {
+		a.log.ErrorF("failed body valdiation %v\n", err)
+		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid credentials"}
+	}
+
+	if err := a.vt.Validator.Struct(payload); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			return c.Status(fiber.StatusBadRequest).JSON(a.vt.ValidationErrors(ve))
+		}
+		return &fiber.Error{Code: fiber.StatusBadRequest, Message: err.Error()}
+	}
+
+	email := strings.Trim(strings.ToLower(payload.Email), " ")
+
+	user, err := a.db.GetUserByEmail(c.Context(), email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid credentials"}
+		}
+		a.log.ErrorF("failed get user by email: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "login failed"}
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password)); err != nil {
+		a.log.Infof("failed password check: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid credentials"}
+	}
+
+	issuedAt := time.Now()
+	expiresAt := issuedAt.Add(24 * time.Hour)
+	claims := &jwt.RegisteredClaims{
+		IssuedAt:  jwt.NewNumericDate(issuedAt),
+		ExpiresAt: jwt.NewNumericDate(expiresAt),
+		Issuer:    user.ID.String(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString([]byte(lib.GetTokenSecret()))
+	if err != nil {
+		a.log.ErrorF("failed to sign token: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "login failed"}
+	}
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "jwt",
+		Value:    ss,
+		Expires:  expiresAt,
+		HTTPOnly: true,
+	})
 
 	return c.JSON(types.NewAPIResponse(user))
 }
