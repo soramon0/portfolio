@@ -1,0 +1,12 @@
+
+[phases.setup]
+nixPkgs = ['...', 'node', 'pnpm', 'go', 'make']
+
+[phases.install]
+cmds = ['go mod download', 'make go-prepare', 'make install-web-dependencies']
+
+[phases.build]
+cmds = ['make all']
+
+[start]
+cmd = './bin/portfolio'
