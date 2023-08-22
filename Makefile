@@ -19,6 +19,9 @@ go-build:
 	@echo "=== Building Protfolio Project ==="
 	@go build -o bin/portfolio
 
+go-dev:
+	@air
+
 # Build the SvelteKit project
 svelte-build: install-web-dependencies
 	@echo "=== Building SvelteKit Project ==="
@@ -26,6 +29,13 @@ svelte-build: install-web-dependencies
 		pnpm run -C ./src/template build; \
 	else \
 		npm run --prefix ./src/template build; \
+	fi
+
+svelte-dev:
+	@if command -v pnpm >/dev/null; then \
+		pnpm run -C ./src/template dev; \
+	else \
+		npm run --prefix ./src/template dev; \
 	fi
 
 # Install template dependencies
@@ -53,8 +63,6 @@ containers-up:
 containers-down:
 	@docker compose down
 
-develop:
-	@air
 
 generate-sql:
 	@sqlc generate
