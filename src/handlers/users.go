@@ -23,7 +23,11 @@ func NewUsers(db *database.Queries, l *lib.AppLogger) *Users {
 	}
 }
 
-func (u *Users) GetUsers(c *fiber.Ctx) error {
+func (u *Users) GetMe(ctx *fiber.Ctx, authUser database.GetUserByIdRow) error {
+	return ctx.JSON(authUser)
+}
+
+func (u *Users) GetUsers(c *fiber.Ctx, user database.GetUserByIdRow) error {
 	users, err := u.db.ListUsers(c.Context())
 	if err != nil {
 		u.log.ErrorF("could not fetch users: %v\n", err)
@@ -33,7 +37,7 @@ func (u *Users) GetUsers(c *fiber.Ctx) error {
 	return c.JSON(types.NewAPIListResponse(users, len(users)))
 }
 
-func (u *Users) GetUserById(ctx *fiber.Ctx) error {
+func (u *Users) GetUserById(ctx *fiber.Ctx, authUser database.GetUserByIdRow) error {
 	id, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
 		u.log.Infof("failed to parse id: %v\n", err)

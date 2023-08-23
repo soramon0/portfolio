@@ -24,12 +24,12 @@ func Register(a *fiber.App, db *database.Queries, vt *lib.ValidatorTranslator, l
 	authRouter.Post("/register", authHandlers.Register)
 	authRouter.Post("/login", authHandlers.Login)
 	authRouter.Post("/logout", authHandlers.Logout)
-	authRouter.Post("/user", authHandlers.GetUser)
 
 	usersHandlers := NewUsers(db, l)
 	usersRouter := v1Router.Group("/users")
-	usersRouter.Get("/", usersHandlers.GetUsers)
-	usersRouter.Get("/:id", usersHandlers.GetUserById)
+	usersRouter.Get("/", authHandlers.userMiddleware(usersHandlers.GetUsers))
+	usersRouter.Get("/me", authHandlers.userMiddleware(usersHandlers.GetMe))
+	usersRouter.Get("/:id", authHandlers.userMiddleware(usersHandlers.GetUserById))
 
 	apiRoutes.Use(
 		func(c *fiber.Ctx) error {
