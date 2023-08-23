@@ -5,6 +5,7 @@
 package database
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,4 +21,13 @@ type User struct {
 	UserType  string    `json:"user_type"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type WebsiteConfiguration struct {
+	ConfigurationName  string         `json:"configuration_name"`
+	ConfigurationValue string         `json:"configuration_value"`
+	Description        sql.NullString `json:"description"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	Active             bool           `json:"active"`
 }
