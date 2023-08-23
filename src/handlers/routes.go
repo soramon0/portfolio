@@ -10,7 +10,8 @@ import (
 )
 
 func Register(a *fiber.App, db *database.Queries, vt *lib.ValidatorTranslator, l *lib.AppLogger) {
-	fiberMiddleware(a)
+	middleware := NewMiddleware(db, l)
+	middleware.fiberMiddleware(a)
 
 	apiRoutes := a.Group("/api").Use(logger.New())
 	apiRoutes.Get("/healthz", func(c *fiber.Ctx) error {
@@ -26,10 +27,12 @@ func Register(a *fiber.App, db *database.Queries, vt *lib.ValidatorTranslator, l
 	authRouter.Post("/logout", authHandlers.Logout)
 
 	usersHandlers := NewUsers(db, l)
-	usersRouter := v1Router.Group("/users")
-	usersRouter.Get("/", authHandlers.userMiddleware(usersHandlers.GetUsers))
-	usersRouter.Get("/me", authHandlers.userMiddleware(usersHandlers.GetMe))
-	usersRouter.Get("/:id", authHandlers.userMiddleware(usersHandlers.GetUserById))
+	usersRouter := v1Router.Group("/users").Use(middleware.WithAuthenticatedUser)
+	usersRouter.Get("/me", usersHandlers.GetMe)
+
+	adminUsersRouter := usersRouter.Use(middleware.WithAuthenticatedAdmin)
+	adminUsersRouter.Get("/", usersHandlers.GetUsers)
+	adminUsersRouter.Get("/:id", usersHandlers.GetUserById)
 
 	apiRoutes.Use(
 		func(c *fiber.Ctx) error {

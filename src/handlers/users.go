@@ -23,11 +23,15 @@ func NewUsers(db *database.Queries, l *lib.AppLogger) *Users {
 	}
 }
 
-func (u *Users) GetMe(ctx *fiber.Ctx, authUser database.GetUserByIdRow) error {
-	return ctx.JSON(authUser)
+func (u *Users) GetMe(ctx *fiber.Ctx) error {
+	user := getAuthenticatedUser(ctx)
+	if user == nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthentiacted"}
+	}
+	return ctx.JSON(types.NewAPIResponse(user))
 }
 
-func (u *Users) GetUsers(c *fiber.Ctx, user database.GetUserByIdRow) error {
+func (u *Users) GetUsers(c *fiber.Ctx) error {
 	users, err := u.db.ListUsers(c.Context())
 	if err != nil {
 		u.log.ErrorF("could not fetch users: %v\n", err)
@@ -37,7 +41,7 @@ func (u *Users) GetUsers(c *fiber.Ctx, user database.GetUserByIdRow) error {
 	return c.JSON(types.NewAPIListResponse(users, len(users)))
 }
 
-func (u *Users) GetUserById(ctx *fiber.Ctx, authUser database.GetUserByIdRow) error {
+func (u *Users) GetUserById(ctx *fiber.Ctx) error {
 	id, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
 		u.log.Infof("failed to parse id: %v\n", err)
