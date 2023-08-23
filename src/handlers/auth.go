@@ -159,6 +159,17 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 	return c.JSON(types.NewAPIResponse(user))
 }
 
+func (a *Auth) Logout(c *fiber.Ctx) error {
+	c.Cookie(&fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	})
+
+	return c.JSON(types.NewAPIResponse(fiber.Map{"logout": true}))
+}
+
 func (a *Auth) GetUser(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
 	token, err := jwt.ParseWithClaims(cookie, &jwt.RegisteredClaims{}, func(t *jwt.Token) (interface{}, error) {
