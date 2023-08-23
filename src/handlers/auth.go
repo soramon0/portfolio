@@ -159,6 +159,39 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 	return c.JSON(types.NewAPIResponse(user))
 }
 
+func (a *Auth) GetUser(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+	token, err := jwt.ParseWithClaims(cookie, &jwt.RegisteredClaims{}, func(t *jwt.Token) (interface{}, error) {
+		return []byte(lib.GetTokenSecret()), nil
+	})
+	if err != nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthenticated"}
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok && !token.Valid {
+		a.log.ErrorF("invalid token claims types: %+v\n", token.Claims)
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to authenticated"}
+	}
+
+	userId, err := uuid.Parse(claims.Issuer)
+	if err != nil {
+		a.log.ErrorF("failed to parse issuer as uuid: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthenticated"}
+	}
+
+	user, err := a.db.GetUserById(c.Context(), userId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthenticated"}
+		}
+		a.log.ErrorF("failed to parse issuer as uuid: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to authenticated"}
+	}
+
+	return c.JSON(types.NewAPIResponse(user))
+}
+
 func generateUniqueUsername(ctx context.Context, db *database.Queries) (string, error) {
 	seed := time.Now().UTC().UnixNano()
 	username := namegenerator.NewNameGenerator(seed).Generate()

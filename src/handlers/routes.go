@@ -23,6 +23,7 @@ func Register(a *fiber.App, db *database.Queries, vt *lib.ValidatorTranslator, l
 	authRouter := v1Router.Group("/auth")
 	authRouter.Post("/register", authHandlers.Register)
 	authRouter.Post("/login", authHandlers.Login)
+	authRouter.Post("/user", authHandlers.GetUser)
 
 	usersHandlers := NewUsers(db, l)
 	usersRouter := v1Router.Group("/users")
