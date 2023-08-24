@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -31,7 +32,18 @@ func (m *Middleware) fiberMiddleware(a *fiber.App) {
 		// Recover from panics
 		recover.New(),
 		// Add CORS to each route.
-		cors.New(),
+		cors.New(cors.Config{
+			AllowOrigins: "*",
+			AllowMethods: strings.Join([]string{
+				fiber.MethodGet,
+				fiber.MethodPost,
+				fiber.MethodHead,
+				fiber.MethodPut,
+				fiber.MethodDelete,
+				fiber.MethodPatch,
+			}, ","),
+			AllowCredentials: true,
+		}),
 	)
 }
 
