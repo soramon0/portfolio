@@ -19,10 +19,16 @@ func GetDatabaseURL() string {
 	return url
 }
 
-func GetServerBindAddress() string {
-	host, err := checkEnv("SERVER_HOST")
+func GetTokenSecret() string {
+	secret, err := checkEnv("TOKEN_SECRET")
 	Must(err)
-	port, err := checkEnv("SERVER_PORT")
+	return secret
+}
+
+func GetServerBindAddress() string {
+	host, err := checkEnv("HOST")
+	Must(err)
+	port, err := checkEnv("PORT")
 	Must(err)
 
 	return fmt.Sprintf("%s:%s", host, port)

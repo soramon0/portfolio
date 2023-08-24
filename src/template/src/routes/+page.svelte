@@ -1,14 +1,7 @@
-<script lang="ts">
-	import type { PageData } from './$types';
-		
-	 export let data: PageData;
-	 console.log('home page data:', data)
-</script>
-
-<head>
+<svelte:head>
 	<title>sora.mon0 | Home</title>
 	<meta name="description" content="sora.mon0's full stack portfolio website" />
-</head>
+</svelte:head>
 
 <main class="h-screen">
 	<div class="bg-indigo-600">
