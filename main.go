@@ -14,6 +14,11 @@ func main() {
 	db := lib.NewDB(lib.GetDatabaseURL(), logger)
 	app := fiber.New(configs.FiberConfig())
 
-	handlers.Register(app, db, logger)
+	vt, err := lib.NewValidator()
+	if err != nil {
+		logger.ErrorFatalF("could not create validator %v", err)
+	}
+
+	handlers.Register(app, db, vt, logger)
 	lib.StartServer(app, logger)
 }

@@ -40,6 +40,6 @@ type APIFieldError struct {
 	Message string `json:"message"`
 }
 
-type APIValidaitonErrors struct {
+type APIValidationErrors struct {
 	Errors []APIFieldError `json:"errors"`
 }

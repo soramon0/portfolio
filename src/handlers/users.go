@@ -23,6 +23,14 @@ func NewUsers(db *database.Queries, l *lib.AppLogger) *Users {
 	}
 }
 
+func (u *Users) GetMe(ctx *fiber.Ctx) error {
+	user := getAuthenticatedUser(ctx)
+	if user == nil {
+		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthentiacted"}
+	}
+	return ctx.JSON(types.NewAPIResponse(user))
+}
+
 func (u *Users) GetUsers(c *fiber.Ctx) error {
 	users, err := u.db.ListUsers(c.Context())
 	if err != nil {
