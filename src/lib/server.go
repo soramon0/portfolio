@@ -6,14 +6,34 @@ import (
 	"syscall"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/soramon0/portfolio/src/cache"
+	"github.com/soramon0/portfolio/src/internal/database"
 )
 
-func StartServer(a *fiber.App, l *AppLogger) {
+type AppServer struct {
+	App   *fiber.App
+	DB    *database.Queries
+	Cache *cache.Cache
+	VT    *ValidatorTranslator
+	Log   *AppLogger
+}
+
+func NewAppServer(app *fiber.App, db *database.Queries, r *cache.Cache, vt *ValidatorTranslator, l *AppLogger) *AppServer {
+	return &AppServer{
+		App:   app,
+		DB:    db,
+		Cache: r,
+		VT:    vt,
+		Log:   l,
+	}
+}
+
+func (a *AppServer) StartServer() {
 	if GetDevelopmentMode() == "development" {
-		listenAndServe(a, l)
+		listenAndServe(a.App, a.Log)
 	} else {
-		go listenAndServe(a, l)
-		startServerWithGracefulShutdown(a, l)
+		go listenAndServe(a.App, a.Log)
+		startServerWithGracefulShutdown(a.App, a.Log)
 	}
 }
 

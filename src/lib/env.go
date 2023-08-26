@@ -19,6 +19,12 @@ func GetDatabaseURL() string {
 	return url
 }
 
+func GetRedisURL() string {
+	url, err := checkEnv("REDIS_URL")
+	Must(err)
+	return url
+}
+
 func GetTokenSecret() string {
 	secret, err := checkEnv("TOKEN_SECRET")
 	Must(err)
