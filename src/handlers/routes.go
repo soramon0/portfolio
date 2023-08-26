@@ -10,8 +10,8 @@ import (
 )
 
 func Register(a *fiber.App, db *database.Queries, vt *lib.ValidatorTranslator, l *lib.AppLogger) {
-	middleware := NewMiddleware(db, l)
-	middleware.fiberMiddleware(a)
+	m := NewMiddleware(db, l)
+	m.fiberMiddleware(a)
 
 	apiRoutes := a.Group("/api").Use(logger.New())
 	apiRoutes.Get("/healthz", func(c *fiber.Ctx) error {
@@ -22,15 +22,15 @@ func Register(a *fiber.App, db *database.Queries, vt *lib.ValidatorTranslator, l
 
 	authHandlers := NewAuth(db, vt, l)
 	authRouter := v1Router.Group("/auth")
-	authRouter.Post("/register", authHandlers.Register)
-	authRouter.Post("/login", authHandlers.Login)
+	authRouter.Post("/register", m.WithWebsiteConfig("allow_user_register", "allow", "registration is disabled"), authHandlers.Register)
+	authRouter.Post("/login", m.WithWebsiteConfig("allow_user_login", "allow", "login is disabled"), authHandlers.Login)
 	authRouter.Post("/logout", authHandlers.Logout)
 
 	usersHandlers := NewUsers(db, l)
-	usersRouter := v1Router.Group("/users").Use(middleware.WithAuthenticatedUser)
+	usersRouter := v1Router.Group("/users").Use(m.WithAuthenticatedUser)
 	usersRouter.Get("/me", usersHandlers.GetMe)
 
-	adminUsersRouter := usersRouter.Use(middleware.WithAuthenticatedAdmin)
+	adminUsersRouter := usersRouter.Use(m.WithAuthenticatedAdmin)
 	adminUsersRouter.Get("/", usersHandlers.GetUsers)
 	adminUsersRouter.Get("/:id", usersHandlers.GetUserById)
 

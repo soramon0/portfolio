@@ -103,3 +103,22 @@ func (m *Middleware) WithAuthenticatedAdmin(c *fiber.Ctx) error {
 
 	return c.Next()
 }
+
+func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string) func(*fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		wc, err := m.db.GetWebsiteConfigurationByName(c.Context(), name)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return &fiber.Error{Code: fiber.StatusUnauthorized, Message: errMsg}
+			}
+			m.log.ErrorF("failed to get website config for %s: %v\n", name, err)
+			return &fiber.Error{Code: fiber.StatusInternalServerError, Message: errMsg}
+		}
+
+		if !wc.Active || strings.ToLower(wc.ConfigurationValue) != strings.ToLower(value) {
+			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: errMsg}
+		}
+
+		return c.Next()
+	}
+}
