@@ -4,11 +4,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/soramon0/portfolio/src/lib"
+	"github.com/soramon0/portfolio/src/server"
 	"github.com/soramon0/portfolio/src/template"
 )
 
-func Register(s *lib.AppServer) {
+func Register(s *server.AppServer) {
 	m := NewMiddleware(s.DB, s.Cache, s.Log)
 	m.fiberMiddleware(s.App)
 

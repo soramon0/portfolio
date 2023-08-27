@@ -2,16 +2,13 @@ package handlers
 
 import (
 	"database/sql"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
 	"github.com/soramon0/portfolio/src/cache"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/lib"
@@ -131,36 +128,11 @@ func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string)
 
 func (m *Middleware) WithRateLimit(limit int, perSec int) func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		key := "user:" + c.IP()
-		if err := m.cache.Client.Get(c.Context(), key).Err(); err == redis.Nil {
-			err = m.cache.Client.SetEx(c.Context(), key, "0", time.Second*time.Duration(perSec)).Err()
-			if err != nil {
-				m.log.ErrorF("failed to set rate limit for key %s: %v", key, err)
-				return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "rate limit: internal server error"}
-			}
-		}
-
-		if err := m.cache.Client.Incr(c.Context(), key).Err(); err != nil {
-			m.log.ErrorF("failed to increment rate limit for key %s: %v", key, err)
-			return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "rate limit: internal server error"}
-		}
-
-		requests, err := m.cache.Client.Get(c.Context(), key).Result()
-		if err != nil {
-			m.log.ErrorF("failed to get rate limit for key %s: %v", key, err)
-			return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "rate limit: internal server error"}
-		}
-
-		requestsNum, err := strconv.Atoi(requests)
-		if err != nil {
-			m.log.ErrorF("failed to request number for rate limit key: %s; %v", key, err)
-			return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "rate limit: internal server error"}
-		}
-
-		if requestsNum > limit {
+		key := "ratelimit:user:" + c.IP()
+		requests, accept := m.cache.CounterRateLimit(c.Context(), key, limit, perSec)
+		if !accept || requests == 0 {
 			return &fiber.Error{Code: fiber.StatusTooManyRequests, Message: "Too many requests. Please try again later"}
 		}
-
 		return c.Next()
 	}
 }
