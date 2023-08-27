@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,19 +10,22 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/soramon0/portfolio/src/cache"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/lib"
 )
 
 type Middleware struct {
-	db  *database.Queries
-	log *lib.AppLogger
+	db    *database.Queries
+	cache *cache.Cache
+	log   *lib.AppLogger
 }
 
-func NewMiddleware(db *database.Queries, l *lib.AppLogger) *Middleware {
+func NewMiddleware(db *database.Queries, cache *cache.Cache, l *lib.AppLogger) *Middleware {
 	return &Middleware{
-		db:  db,
-		log: l,
+		db:    db,
+		cache: cache,
+		log:   l,
 	}
 }
 
@@ -67,8 +71,8 @@ func (m *Middleware) WithAuthenticatedUser(c *fiber.Ctx) error {
 	}
 
 	claims, ok := token.Claims.(*jwt.RegisteredClaims)
-	if !ok && !token.Valid {
-		m.log.ErrorF("invalid token claims types: %+v\n", token.Claims)
+	if !ok || !token.Valid {
+		m.log.ErrorF("invalid token: %+v\n", token)
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to authenticated"}
 	}
 
@@ -104,7 +108,7 @@ func (m *Middleware) WithAuthenticatedAdmin(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string) func(*fiber.Ctx) error {
+func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		wc, err := m.db.GetWebsiteConfigurationByName(c.Context(), name)
 		if err != nil {
@@ -115,10 +119,22 @@ func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string)
 			return &fiber.Error{Code: fiber.StatusInternalServerError, Message: errMsg}
 		}
 
-		if !wc.Active || strings.ToLower(wc.ConfigurationValue) != strings.ToLower(value) {
+		if !wc.Active || !strings.EqualFold(wc.ConfigurationValue, value) {
 			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: errMsg}
 		}
 
+		return c.Next()
+	}
+}
+
+func (m *Middleware) WithRateLimit(limit int, perSec int, backOffDuration int) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		key := "ratelimit:user:" + c.IP()
+		accept, duration := m.cache.CounterRateLimit(c.Context(), key, limit, perSec, backOffDuration)
+		if !accept {
+			msg := fmt.Sprintf("Too many requests. Please try again after %ds", duration)
+			return &fiber.Error{Code: fiber.StatusTooManyRequests, Message: msg}
+		}
 		return c.Next()
 	}
 }
