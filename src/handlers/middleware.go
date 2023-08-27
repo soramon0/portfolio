@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -126,12 +127,13 @@ func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string)
 	}
 }
 
-func (m *Middleware) WithRateLimit(limit int, perSec int) fiber.Handler {
+func (m *Middleware) WithRateLimit(limit int, perSec int, backOffDuration int) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		key := "ratelimit:user:" + c.IP()
-		requests, accept := m.cache.CounterRateLimit(c.Context(), key, limit, perSec)
-		if !accept || requests == 0 {
-			return &fiber.Error{Code: fiber.StatusTooManyRequests, Message: "Too many requests. Please try again later"}
+		accept, duration := m.cache.CounterRateLimit(c.Context(), key, limit, perSec, backOffDuration)
+		if !accept {
+			msg := fmt.Sprintf("Too many requests. Please try again after %ds", duration)
+			return &fiber.Error{Code: fiber.StatusTooManyRequests, Message: msg}
 		}
 		return c.Next()
 	}

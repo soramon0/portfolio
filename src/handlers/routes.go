@@ -12,7 +12,7 @@ func Register(s *server.AppServer) {
 	m := NewMiddleware(s.DB, s.Cache, s.Log)
 	m.fiberMiddleware(s.App)
 
-	apiRoutes := s.App.Group("/api").Use(logger.New()).Use(m.WithRateLimit(20, 60))
+	apiRoutes := s.App.Group("/api").Use(logger.New()).Use(m.WithRateLimit(20, 60, 60))
 	apiRoutes.Get("/healthz", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"ok": true})
 	})
