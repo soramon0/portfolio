@@ -107,7 +107,7 @@ func (m *Middleware) WithAuthenticatedAdmin(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string) func(*fiber.Ctx) error {
+func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		wc, err := m.db.GetWebsiteConfigurationByName(c.Context(), name)
 		if err != nil {
@@ -126,7 +126,7 @@ func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string)
 	}
 }
 
-func (m *Middleware) WithRateLimit(limit int, perSec int) func(*fiber.Ctx) error {
+func (m *Middleware) WithRateLimit(limit int, perSec int) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		key := "ratelimit:user:" + c.IP()
 		requests, accept := m.cache.CounterRateLimit(c.Context(), key, limit, perSec)
