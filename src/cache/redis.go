@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -41,26 +40,15 @@ func (c *Cache) CounterRateLimit(ctx context.Context, key string, limit int, per
 		return 0, false
 	}
 
-	if err := c.Client.Decr(ctx, key).Err(); err != nil {
+	requests, err := c.Client.Decr(ctx, key).Result()
+	if err != nil {
 		c.log.ErrorF("failed to decrement rate limit for key %s: %v", key, err)
 		return 0, false
 	}
 
-	requests, err := c.Client.Get(ctx, key).Result()
-	if err != nil {
-		c.log.ErrorF("failed to get rate limit for key %s: %v", key, err)
-		return 0, false
+	if requests <= 0 {
+		return int(requests), false
 	}
 
-	requestsNum, err := strconv.Atoi(requests)
-	if err != nil {
-		c.log.ErrorF("failed to convert remaining request for rate limit key: %s; %v", key, err)
-		return 0, false
-	}
-
-	if requestsNum <= 0 {
-		return requestsNum, false
-	}
-
-	return requestsNum, true
+	return int(requests), true
 }
