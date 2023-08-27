@@ -119,7 +119,7 @@ func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string)
 			return &fiber.Error{Code: fiber.StatusInternalServerError, Message: errMsg}
 		}
 
-		if !wc.Active || strings.EqualFold(wc.ConfigurationValue, value) {
+		if !wc.Active || !strings.EqualFold(wc.ConfigurationValue, value) {
 			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: errMsg}
 		}
 
