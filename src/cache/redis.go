@@ -36,7 +36,8 @@ func (c *Cache) CounterRateLimit(ctx context.Context, key string, limit int, per
 	}
 
 	// break early if counter hits 0
-	if latestCount == "0" {
+	// or 1 since we will decrement it in this round from 0 to 1
+	if latestCount == "0" || latestCount == "1" {
 		// stop user from sending any further request for backoff duration amount
 		if err = c.Client.SetEx(ctx, key, -1, time.Second*time.Duration(backoffDuration)).Err(); err != nil {
 			return false, backoffDuration
