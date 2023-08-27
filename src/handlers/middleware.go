@@ -70,8 +70,8 @@ func (m *Middleware) WithAuthenticatedUser(c *fiber.Ctx) error {
 	}
 
 	claims, ok := token.Claims.(*jwt.RegisteredClaims)
-	if !ok && !token.Valid {
-		m.log.ErrorF("invalid token claims types: %+v\n", token.Claims)
+	if !ok || !token.Valid {
+		m.log.ErrorF("invalid token: %+v\n", token)
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to authenticated"}
 	}
 
