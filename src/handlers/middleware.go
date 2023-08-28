@@ -13,17 +13,18 @@ import (
 	"github.com/soramon0/portfolio/src/cache"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/lib"
+	"github.com/soramon0/portfolio/src/store"
 )
 
 type Middleware struct {
-	db    *database.Queries
+	store store.Store
 	cache *cache.Cache
 	log   *lib.AppLogger
 }
 
-func NewMiddleware(db *database.Queries, cache *cache.Cache, l *lib.AppLogger) *Middleware {
+func NewMiddleware(s store.Store, cache *cache.Cache, l *lib.AppLogger) *Middleware {
 	return &Middleware{
-		db:    db,
+		store: s,
 		cache: cache,
 		log:   l,
 	}
@@ -82,7 +83,7 @@ func (m *Middleware) WithAuthenticatedUser(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthenticated"}
 	}
 
-	user, err := m.db.GetUserById(c.Context(), userId)
+	user, err := m.store.GetUserById(c.Context(), userId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthenticated"}
@@ -110,7 +111,7 @@ func (m *Middleware) WithAuthenticatedAdmin(c *fiber.Ctx) error {
 
 func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		wc, err := m.db.GetWebsiteConfigurationByName(c.Context(), name)
+		wc, err := m.store.GetWebsiteConfigurationByName(c.Context(), name)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				return &fiber.Error{Code: fiber.StatusUnauthorized, Message: errMsg}

@@ -5,21 +5,21 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/internal/types"
 	"github.com/soramon0/portfolio/src/lib"
+	"github.com/soramon0/portfolio/src/store"
 )
 
 type Users struct {
-	db  *database.Queries
-	log *lib.AppLogger
+	store store.Store
+	log   *lib.AppLogger
 }
 
 // New Users is used to create a new Users controller.
-func NewUsers(db *database.Queries, l *lib.AppLogger) *Users {
+func NewUsers(s store.Store, l *lib.AppLogger) *Users {
 	return &Users{
-		db:  db,
-		log: l,
+		store: s,
+		log:   l,
 	}
 }
 
@@ -32,7 +32,7 @@ func (u *Users) GetMe(ctx *fiber.Ctx) error {
 }
 
 func (u *Users) GetUsers(c *fiber.Ctx) error {
-	users, err := u.db.ListUsers(c.Context())
+	users, err := u.store.ListUsers(c.Context())
 	if err != nil {
 		u.log.ErrorF("could not fetch users: %v\n", err)
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch users"}
@@ -48,7 +48,7 @@ func (u *Users) GetUserById(ctx *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid user id"}
 	}
 
-	user, err := u.db.GetUserById(ctx.Context(), id)
+	user, err := u.store.GetUserById(ctx.Context(), id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &fiber.Error{Code: fiber.StatusNotFound, Message: "user not found"}
