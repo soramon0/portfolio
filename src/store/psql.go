@@ -17,7 +17,7 @@ type Store interface {
 	GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error)
 }
 
-type PSQLStore struct {
+type psqlStore struct {
 	*database.Queries
 }
 
@@ -26,10 +26,10 @@ func NewStore(url string) (Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &PSQLStore{Queries: database.New(db)}, nil
+	return &psqlStore{Queries: database.New(db)}, nil
 }
 
-func (s *PSQLStore) GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error) {
+func (s *psqlStore) GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error) {
 	seed := time.Now().UTC().UnixNano()
 	username := namegenerator.NewNameGenerator(seed).Generate()
 	exists, err := s.CheckUserExistsByUsername(ctx, username)
