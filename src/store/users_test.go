@@ -11,7 +11,7 @@ import (
 	"github.com/soramon0/portfolio/src/store"
 )
 
-func TestUsers(t *testing.T) {
+func TestCreateUsers(t *testing.T) {
 	setup := func(t *testing.T) store.Store {
 		t.Helper()
 
@@ -39,48 +39,74 @@ func TestUsers(t *testing.T) {
 		}
 	}
 
-	t.Run("Create user", func(t *testing.T) {
-		db := setup(t)
-		defer teardown(t, db)
-		testCreateUser(t, db)
-	})
+	tests := map[string]*database.User{
+		"user type": {
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			Email:     "test@email.com",
+			Password:  "password",
+			Username:  "username",
+			UserType:  "user",
+			FirstName: "",
+			LastName:  "",
+		},
+		"admin type": {
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			Email:     "test@email.com",
+			Password:  "password",
+			Username:  "username",
+			UserType:  "admin",
+			FirstName: "",
+			LastName:  "",
+		},
+	}
+
+	for name, want := range tests {
+		t.Run(name, func(t *testing.T) {
+			db := setup(t)
+			defer teardown(t, db)
+			testCreateUser(t, db, want)
+		})
+	}
 }
 
-func testCreateUser(t *testing.T, db store.Store) {
+func testCreateUser(t *testing.T, db store.Store, want *database.User) {
 	expectRowsCount(t, db, "users", 0)
 
-	id := uuid.New()
-	createdAt := time.Now().UTC()
-	fmt.Println(createdAt)
 	user, err := db.CreateUser(context.TODO(), database.CreateUserParams{
-		ID:        id,
-		CreatedAt: createdAt,
-		UpdatedAt: createdAt,
-		Email:     "test@email.com",
-		Password:  "password",
-		Username:  "username",
-		UserType:  "user",
-		FirstName: "",
-		LastName:  "",
+		ID:        want.ID,
+		CreatedAt: want.CreatedAt,
+		UpdatedAt: want.CreatedAt,
+		Email:     want.Email,
+		Password:  want.Password,
+		Username:  want.Username,
+		UserType:  want.UserType,
+		FirstName: want.FirstName,
+		LastName:  want.LastName,
 	})
 	if err != nil {
 		t.Fatalf("CreateUser() err = %v, want nil", err)
 	}
-	fmt.Println(user.CreatedAt)
 
+	if user.ID.String() != want.ID.String() {
+		t.Fatalf("user.ID != userById.ID; got %v; want %v", user.ID, want.ID)
+	}
 	// time.Equal fails because of nanosecond difference
 	// using time.Sub make sure the difference is less
 	// than 1 second between the two dates
-	if user.CreatedAt.Sub(createdAt) > time.Second {
-		t.Fatalf("user.CreatedAt = %v; want %v", user.CreatedAt, createdAt)
+	if user.CreatedAt.Sub(want.CreatedAt) > time.Second {
+		t.Fatalf("user.CreatedAt = %v; want %v", user.CreatedAt, want.CreatedAt)
 	}
-	if user.UpdatedAt.Sub(createdAt) > time.Second {
-		t.Fatalf("user.UpdatedAt = %v; want %v", user.UpdatedAt, createdAt)
+	if user.UpdatedAt.Sub(want.UpdatedAt) > time.Second {
+		t.Fatalf("user.UpdatedAt = %v; want %v", user.UpdatedAt, want.UpdatedAt)
 	}
 
 	expectRowsCount(t, db, "users", 1)
 
-	userById, err := db.GetUserById(context.TODO(), id)
+	userById, err := db.GetUserById(context.TODO(), user.ID)
 	if err != nil {
 		t.Fatalf("GetUserById() err = %v, want nil", err)
 	}
