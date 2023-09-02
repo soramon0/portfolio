@@ -20,6 +20,11 @@ func main() {
 	if err != nil {
 		logger.ErrorFatalF("could not connect to postgres: %v", err)
 	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.ErrorFatalF("failed to close db connection: %v", err)
+		}
+	}()
 
 	cache, err := cache.NewCache(lib.GetRedisURL(), logger)
 	if err != nil {
