@@ -15,10 +15,14 @@ import (
 type Store interface {
 	database.Querier
 	GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error)
+	QueryRow(query string, args ...any) *sql.Row
+	Exec(query string, args ...any) (sql.Result, error)
+	Close() error
 }
 
 type psqlStore struct {
 	*database.Queries
+	db *sql.DB
 }
 
 func NewStore(url string) (Store, error) {
@@ -26,7 +30,22 @@ func NewStore(url string) (Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &psqlStore{Queries: database.New(db)}, nil
+	return &psqlStore{
+		db:      db,
+		Queries: database.New(db),
+	}, nil
+}
+
+func (s *psqlStore) QueryRow(query string, args ...any) *sql.Row {
+	return s.db.QueryRow(query, args...)
+}
+
+func (s *psqlStore) Exec(query string, args ...any) (sql.Result, error) {
+	return s.db.Exec(query, args...)
+}
+
+func (s *psqlStore) Close() error {
+	return s.db.Close()
 }
 
 func (s *psqlStore) GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error) {
