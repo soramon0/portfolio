@@ -91,19 +91,7 @@ func testCreateUser(t *testing.T, db store.Store, want *database.User) {
 		t.Fatalf("CreateUser() err = %v, want nil", err)
 	}
 
-	if user.ID.String() != want.ID.String() {
-		t.Fatalf("user.ID != want.ID; got %v; want %v", user.ID, want.ID)
-	}
-	// time.Equal fails because of nanosecond difference
-	// using time.Sub make sure the difference is less
-	// than 1 second between the two dates
-	if user.CreatedAt.Sub(want.CreatedAt) > time.Second {
-		t.Fatalf("user.CreatedAt = %v; want %v", user.CreatedAt, want.CreatedAt)
-	}
-	if user.UpdatedAt.Sub(want.UpdatedAt) > time.Second {
-		t.Fatalf("user.UpdatedAt = %v; want %v", user.UpdatedAt, want.UpdatedAt)
-	}
-
+	expectUserEq(t, &user, want)
 	expectRowsCount(t, db, "users", 1)
 
 	userById, err := db.GetUserById(context.TODO(), user.ID)
@@ -119,6 +107,43 @@ func testCreateUser(t *testing.T, db store.Store, want *database.User) {
 	}
 	if !user.UpdatedAt.Equal(userById.UpdatedAt) {
 		t.Fatalf("user.UpdatedAt != userById.UpdatedAt; got %v; want %v", user.UpdatedAt, userById.UpdatedAt)
+	}
+}
+
+func expectUserEq(t *testing.T, got, want *database.User) {
+	if got == want {
+		return
+	}
+
+	if got.ID.String() != want.ID.String() {
+		t.Fatalf("user.ID = %v; want %v", got.ID, want.ID)
+	}
+	// time.Equal fails because of nanosecond difference
+	// using time.Sub make sure the difference is less
+	// than 1 second between the two dates
+	if got.CreatedAt.Sub(want.CreatedAt) > time.Second {
+		t.Fatalf("user.CreatedAt = %v; want %v", got.CreatedAt, want.CreatedAt)
+	}
+	if got.UpdatedAt.Sub(want.UpdatedAt) > time.Second {
+		t.Fatalf("user.UpdatedAt = %v; want %v", got.UpdatedAt, want.UpdatedAt)
+	}
+	if got.Email != want.Email {
+		t.Fatalf("user.Email = %v; want %v", got.Email, want.Email)
+	}
+	if got.Username != want.Username {
+		t.Fatalf("user.Username = %v; want %v", got.Username, want.Username)
+	}
+	if got.UserType != want.UserType {
+		t.Fatalf("user.UserType = %v; want %v", got.UserType, want.UserType)
+	}
+	if got.Password != want.Password {
+		t.Fatalf("user.Password = %v; want %v", got.Password, want.Password)
+	}
+	if got.FirstName != want.FirstName {
+		t.Fatalf("user.FirstName = %v; want %v", got.FirstName, want.FirstName)
+	}
+	if got.LastName != want.LastName {
+		t.Fatalf("user.LastName = %v; want %v", got.LastName, want.LastName)
 	}
 }
 
