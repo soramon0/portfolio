@@ -3,13 +3,17 @@ package store_test
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/store"
 )
+
+type checkErrFn func(error) (stopTest bool, wantErr error)
 
 func TestCreateUsers(t *testing.T) {
 	setup := func(t *testing.T) store.Store {
@@ -39,28 +43,78 @@ func TestCreateUsers(t *testing.T) {
 		}
 	}
 
-	tests := map[string]*database.User{
+	tests := map[string]struct {
+		user    *database.User
+		checkFn checkErrFn
+	}{
 		"user type": {
-			ID:        uuid.New(),
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-			Email:     "test1@email.com",
-			Password:  "password",
-			Username:  "username1",
-			UserType:  "user",
-			FirstName: "",
-			LastName:  "",
+			user: &database.User{
+				ID:        uuid.New(),
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+				Email:     "test1@email.com",
+				Password:  "password",
+				Username:  "username1",
+				UserType:  "user",
+				FirstName: "",
+				LastName:  "",
+			},
+			checkFn: func(err error) (bool, error) {
+				if err != nil {
+					return true, fmt.Errorf("CreateUser() err = %v, want nil", err)
+				}
+				return false, nil
+			},
 		},
 		"admin type": {
-			ID:        uuid.New(),
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
-			Email:     "test2@email.com",
-			Password:  "password",
-			Username:  "username2",
-			UserType:  "admin",
-			FirstName: "",
-			LastName:  "",
+			user: &database.User{
+				ID:        uuid.New(),
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+				Email:     "test2@email.com",
+				Password:  "password",
+				Username:  "username2",
+				UserType:  "admin",
+				FirstName: "",
+				LastName:  "",
+			},
+			checkFn: func(err error) (bool, error) {
+				if err != nil {
+					return true, fmt.Errorf("CreateUser() err = %v, want nil", err)
+				}
+				return false, nil
+			},
+		},
+		"wrong type": {
+			user: &database.User{
+				ID:        uuid.New(),
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+				Email:     "test2@email.com",
+				Password:  "password",
+				Username:  "username2",
+				UserType:  "wrong type",
+				FirstName: "",
+				LastName:  "",
+			},
+			checkFn: func(err error) (bool, error) {
+				if err == nil {
+					return true, fmt.Errorf("CreateUser() err = nil, want constraint violation error")
+				}
+
+				pgErr, ok := err.(*pq.Error)
+				if !ok {
+					return true, fmt.Errorf("CreateUser() err.(type) = %v; want err.(*pq.Error)", err)
+				}
+				if pgErr.Code.Name() != "check_violation" {
+					return true, fmt.Errorf("CreateUser() err.Code = %v; want check_violation", pgErr.Code.Name())
+				}
+				if !strings.Contains(pgErr.Error(), `"users" violates check constraint "user_type_check"`) {
+					return true, fmt.Errorf("CreateUser() err.Error = %v; want check constraint sub string", pgErr.Error())
+				}
+
+				return true, nil
+			},
 		},
 	}
 
@@ -68,12 +122,12 @@ func TestCreateUsers(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			db := setup(t)
 			defer teardown(t, db)
-			testCreateUser(t, db, want)
+			testCreateUser(t, db, want.user, want.checkFn)
 		})
 	}
 }
 
-func testCreateUser(t *testing.T, db store.Store, want *database.User) {
+func testCreateUser(t *testing.T, db store.Store, want *database.User, checkFn checkErrFn) {
 	expectRowsCount(t, db, "users", 0)
 
 	user, err := db.CreateUser(context.TODO(), database.CreateUserParams{
@@ -87,8 +141,13 @@ func testCreateUser(t *testing.T, db store.Store, want *database.User) {
 		FirstName: want.FirstName,
 		LastName:  want.LastName,
 	})
-	if err != nil {
-		t.Fatalf("CreateUser() err = %v, want nil", err)
+
+	stopTest, wantErr := checkFn(err)
+	if wantErr != nil {
+		t.Fatal(wantErr)
+	}
+	if stopTest {
+		return
 	}
 
 	expectUserEq(t, &user, want)
