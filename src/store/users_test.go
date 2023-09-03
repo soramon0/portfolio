@@ -92,7 +92,7 @@ func testCreateUser(t *testing.T, db store.Store, want *database.User) {
 	}
 
 	if user.ID.String() != want.ID.String() {
-		t.Fatalf("user.ID != userById.ID; got %v; want %v", user.ID, want.ID)
+		t.Fatalf("user.ID != want.ID; got %v; want %v", user.ID, want.ID)
 	}
 	// time.Equal fails because of nanosecond difference
 	// using time.Sub make sure the difference is less
