@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"strings"
@@ -11,24 +10,24 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/goombaio/namegenerator"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/internal/types"
 	"github.com/soramon0/portfolio/src/lib"
+	"github.com/soramon0/portfolio/src/store"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Auth struct {
-	db  *database.Queries
-	vt  *lib.ValidatorTranslator
-	log *lib.AppLogger
+	store store.Store
+	vt    *lib.ValidatorTranslator
+	log   *lib.AppLogger
 }
 
-func NewAuth(db *database.Queries, vt *lib.ValidatorTranslator, l *lib.AppLogger) *Auth {
+func NewAuth(s store.Store, vt *lib.ValidatorTranslator, l *lib.AppLogger) *Auth {
 	return &Auth{
-		db:  db,
-		vt:  vt,
-		log: l,
+		store: s,
+		vt:    vt,
+		log:   l,
 	}
 }
 
@@ -69,7 +68,7 @@ func (a *Auth) Register(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "registration failed"}
 	}
 
-	userExists, err := a.db.CheckUserExistsByEmail(c.Context(), email)
+	userExists, err := a.store.CheckUserExistsByEmail(c.Context(), email)
 	if err != nil {
 		a.log.ErrorF("failed get user by email: %v\n", err)
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "registration failed"}
@@ -79,13 +78,13 @@ func (a *Auth) Register(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid credentials"}
 	}
 
-	username, err := generateUniqueUsername(c.Context(), a.db)
+	username, err := a.store.GenerateUniqueUsername(c.Context(), 5)
 	if err != nil {
 		a.log.ErrorF("failed generating unique username: %v\n", err)
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "registration failed"}
 	}
 	createdAt := time.Now().UTC()
-	user, err := a.db.CreateUser(c.Context(), database.CreateUserParams{
+	user, err := a.store.CreateUser(c.Context(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: createdAt,
 		UpdatedAt: createdAt,
@@ -121,7 +120,7 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 
 	email := strings.Trim(strings.ToLower(payload.Email), " ")
 
-	user, err := a.db.GetUserByEmail(c.Context(), email)
+	user, err := a.store.GetUserByEmail(c.Context(), email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid credentials"}
@@ -168,18 +167,4 @@ func (a *Auth) Logout(c *fiber.Ctx) error {
 	})
 
 	return c.JSON(types.NewAPIResponse(fiber.Map{"logout": true}))
-}
-
-func generateUniqueUsername(ctx context.Context, db *database.Queries) (string, error) {
-	seed := time.Now().UTC().UnixNano()
-	username := namegenerator.NewNameGenerator(seed).Generate()
-	exists, err := db.CheckUserExistsByUsername(ctx, username)
-	if err != nil {
-		return "", err
-	}
-	if !exists {
-		return username, nil
-	}
-
-	return generateUniqueUsername(ctx, db)
 }

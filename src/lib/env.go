@@ -19,6 +19,14 @@ func GetDatabaseURL() string {
 	return url
 }
 
+func GetTestDatabaseURL() string {
+	url, err := checkEnv("DB_TEST_URL")
+	if err != nil {
+		url = "postgres://postgres:example@127.0.0.1:5433/test_db?sslmode=disable"
+	}
+	return url
+}
+
 func GetRedisURL() string {
 	url, err := checkEnv("REDIS_URL")
 	Must(err)

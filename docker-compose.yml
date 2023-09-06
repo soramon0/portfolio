@@ -12,6 +12,17 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
       POSTGRES_DB: dev_db
+  test_db:
+    image: postgres:15.4
+    restart: unless-stopped
+    ports:
+      - 5433:5432 # change bind port to 5433
+    volumes:
+      - portfoliotestdb:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: test_db
   cache:
     image: redis:7.2
     restart: unless-stopped
@@ -36,6 +47,7 @@ services:
 
 volumes:
   portfoliodb:
+  portfoliotestdb:
   portfoliocache:
   redisinsight:
 

@@ -7,22 +7,22 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/soramon0/portfolio/src/cache"
-	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/lib"
+	"github.com/soramon0/portfolio/src/store"
 )
 
 type AppServer struct {
 	App   *fiber.App
-	DB    *database.Queries
+	Store store.Store
 	Cache *cache.Cache
 	VT    *lib.ValidatorTranslator
 	Log   *lib.AppLogger
 }
 
-func NewAppServer(app *fiber.App, db *database.Queries, r *cache.Cache, vt *lib.ValidatorTranslator, l *lib.AppLogger) *AppServer {
+func NewAppServer(app *fiber.App, s store.Store, r *cache.Cache, vt *lib.ValidatorTranslator, l *lib.AppLogger) *AppServer {
 	return &AppServer{
 		App:   app,
-		DB:    db,
+		Store: s,
 		Cache: r,
 		VT:    vt,
 		Log:   l,
