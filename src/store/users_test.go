@@ -26,6 +26,10 @@ func TestCreateUsers(t *testing.T) {
 			t.Fatal("failed to connect to db: ", err)
 		}
 
+		if err := db.Migrate("../sql/schema/", "up"); err != nil {
+			t.Fatal("failed to migrate db up: ", err)
+		}
+
 		if _, err := db.Exec("DELETE FROM users"); err != nil {
 			t.Fatal("failed to clean users table: ", err)
 		}
@@ -42,8 +46,8 @@ func TestCreateUsers(t *testing.T) {
 			}
 		}()
 
-		if _, err := db.Exec("DELETE FROM users"); err != nil {
-			t.Fatal("failed to clean users table: ", err)
+		if err := db.Migrate("../sql/schema/", "down"); err != nil {
+			t.Fatal("failed to migrate db down: ", err)
 		}
 	}
 

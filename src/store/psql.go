@@ -8,8 +8,10 @@ import (
 
 	"github.com/goombaio/namegenerator"
 	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 
 	"github.com/soramon0/portfolio/src/internal/database"
+	_ "github.com/soramon0/portfolio/src/sql/schema" // Load migration files
 )
 
 type Store interface {
@@ -18,6 +20,7 @@ type Store interface {
 	QueryRow(query string, args ...any) *sql.Row
 	Exec(query string, args ...any) (sql.Result, error)
 	Close() error
+	Migrate(dir string, command string, arguments ...string) error
 }
 
 type psqlStore struct {
@@ -34,6 +37,10 @@ func NewStore(url string) (Store, error) {
 		db:      db,
 		Queries: database.New(db),
 	}, nil
+}
+
+func (s *psqlStore) Migrate(dir string, command string, arguments ...string) error {
+	return goose.Run(command, s.db, dir, arguments...)
 }
 
 func (s *psqlStore) QueryRow(query string, args ...any) *sql.Row {

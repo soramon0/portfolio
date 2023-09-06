@@ -25,6 +25,9 @@ func main() {
 			logger.ErrorFatalF("failed to close db connection: %v", err)
 		}
 	}()
+	if err := db.Migrate("./src/sql/schema", "up"); err != nil {
+		logger.ErrorFatalF("failed to migrate db: %v", err)
+	}
 
 	cache, err := cache.NewCache(lib.GetRedisURL(), logger)
 	if err != nil {
