@@ -37,19 +37,6 @@ type authPayload struct {
 }
 
 func (a *Auth) Register(c *fiber.Ctx) error {
-	wc, err := a.store.GetWebsiteConfigurationByName(c.Context(), "allow_user_register")
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "registeration is disabled"}
-		}
-		a.log.ErrorF("failed to get website config for allow_user_register: %v\n", err)
-		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "registartion failed"}
-	}
-
-	if !wc.Active || strings.ToLower(wc.ConfigurationValue) != "allow" {
-		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "registeration is disabled"}
-	}
-
 	payload := new(authPayload)
 	if err := c.BodyParser(payload); err != nil {
 		a.log.ErrorF("failed body valdiation %v\n", err)
@@ -117,19 +104,6 @@ func (a *Auth) Register(c *fiber.Ctx) error {
 }
 
 func (a *Auth) Login(c *fiber.Ctx) error {
-	wc, err := a.store.GetWebsiteConfigurationByName(c.Context(), "allow_user_login")
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "login is disabled"}
-		}
-		a.log.ErrorF("failed to get website config for allow_user_login: %v\n", err)
-		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "login failed"}
-	}
-
-	if !wc.Active || strings.ToLower(wc.ConfigurationValue) != "allow" {
-		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "login is disabled"}
-	}
-
 	payload := new(authPayload)
 	if err := c.BodyParser(payload); err != nil {
 		a.log.ErrorF("failed body valdiation %v\n", err)

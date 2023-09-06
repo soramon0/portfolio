@@ -21,8 +21,16 @@ func Register(s *server.AppServer) {
 
 	authHandlers := NewAuth(s.Store, s.VT, s.Log)
 	authRouter := v1Router.Group("/auth")
-	authRouter.Post("/register", m.WithWebsiteConfig("allow_user_register", "allow", "registration is disabled"), authHandlers.Register)
-	authRouter.Post("/login", m.WithWebsiteConfig("allow_user_login", "allow", "login is disabled"), authHandlers.Login)
+	authRouter.Post(
+		"/register",
+		m.WithWebsiteConfig("allow_user_register", "allow", "registration is disabled"),
+		authHandlers.Register,
+	)
+	authRouter.Post(
+		"/login",
+		m.WithWebsiteConfig("allow_user_login", "allow", "login is disabled"),
+		authHandlers.Login,
+	)
 	authRouter.Post("/logout", authHandlers.Logout)
 
 	usersHandlers := NewUsers(s.Store, s.Log)
