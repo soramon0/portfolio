@@ -8,8 +8,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/lib/pq"
 	"github.com/soramon0/portfolio/src/internal/database"
+	"github.com/soramon0/portfolio/src/lib"
 	"github.com/soramon0/portfolio/src/store"
 )
 
@@ -19,7 +21,7 @@ func TestCreateUsers(t *testing.T) {
 	setup := func(t *testing.T) store.Store {
 		t.Helper()
 
-		db, err := store.NewStore("postgres://postgres:example@127.0.0.1:5433/test_db?sslmode=disable")
+		db, err := store.NewStore(lib.GetTestDatabaseURL())
 		if err != nil {
 			t.Fatal("failed to connect to db: ", err)
 		}
