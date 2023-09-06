@@ -36,12 +36,14 @@ func TestCreateUsers(t *testing.T) {
 	teardown := func(t *testing.T, db store.Store) {
 		t.Helper()
 
+		defer func() {
+			if err := db.Close(); err != nil {
+				t.Fatal("failed to close db connection: ", err)
+			}
+		}()
+
 		if _, err := db.Exec("DELETE FROM users"); err != nil {
 			t.Fatal("failed to clean users table: ", err)
-		}
-
-		if err := db.Close(); err != nil {
-			t.Fatal("failed to close db connection: ", err)
 		}
 	}
 
