@@ -51,6 +51,9 @@ jobs:
           DB_TEST_URL: 'postgres://postgres:example@localhost:5433/test_db?sslmode=disable'
           REDIS_URL: 'redis://localhost:6379?protocol=3'
           TOKEN_SECRET: 'super_secret' # used just for testing
+          PUBLIC_ACKE_SERVER: ${{ vars.PUBLIC_ACKE_SERVER }}
+          PUBLIC_ACKE_DOMAIN_ID: ${{ vars.PUBLIC_ACKE_DOMAIN_ID }}
+          PUBLIC_API_ENDPOINT: ${{ vars.PUBLIC_API_ENDPOINT }}
 
       - name: Run backend tests
         run: go test ./...
