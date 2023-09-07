@@ -12,6 +12,8 @@ jobs:
     services:
       db:
         image: postgres:15.4
+        ports:
+          - 5432:5432
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: example
@@ -24,6 +26,8 @@ jobs:
           --health-retries 5
       cache:
         image: redis:7.2
+        ports:
+          - 6379:6379
         # Set health checks to wait until redis has started
         options: >-
           --health-cmd "redis-cli ping"
@@ -48,8 +52,8 @@ jobs:
       - name: Build App
         run: make all
         env:
-          DB_TEST_URL: 'postgres://postgres:example@db:5433/test_db?sslmode=disable'
-          REDIS_URL: 'redis://cache:6379?protocol=3'
+          DB_TEST_URL: 'postgres://postgres:example@localhost:5433/test_db?sslmode=disable'
+          REDIS_URL: 'redis://localhost:6379?protocol=3'
           TOKEN_SECRET: 'super_secret' # used just for testing
           PUBLIC_ACKE_SERVER: ${{ vars.PUBLIC_ACKE_SERVER }}
           PUBLIC_ACKE_DOMAIN_ID: ${{ vars.PUBLIC_ACKE_DOMAIN_ID }}
