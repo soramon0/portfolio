@@ -1,4 +1,4 @@
-.PHONY: all info go-build go-prepare go-dev svelte-build svelete-dev install-web-dependencies clean
+.PHONY: all info go-build go-prepare go-dev svelte-build svelete-dev install-backend-dependencies install-web-dependencies clean
 
 info:
 	$(info ------------------------------------------)
@@ -19,7 +19,7 @@ go-prepare:
 	@go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	@go install github.com/pressly/goose/v3/cmd/goose@latest
 
-go-build:
+go-build: install-backend-dependencies
 	@echo "=== Building Protfolio Project ==="
 	@go build -o bin/portfolio
 
@@ -35,6 +35,10 @@ svelte-build: install-web-dependencies
 		npm run --prefix ./src/template build; \
 	fi
 
+install-backend-dependencies:
+	@echo "=== Installing Backend Deps ==="
+	@go get .
+
 svelte-dev:
 	@if command -v pnpm >/dev/null; then \
 		pnpm run -C ./src/template dev; \
@@ -44,6 +48,7 @@ svelte-dev:
 
 # Install template dependencies
 install-web-dependencies:
+	@echo "=== Installing Frontend Deps ==="
 	@if command -v pnpm >/dev/null; then \
 		pnpm install -C ./src/template; \
 	else \
