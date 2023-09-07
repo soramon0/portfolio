@@ -2,7 +2,7 @@ name: Build & Deploy
 
 on:
   push:
-    branches: [main, develop, railway-github-cd] # last branch for testing
+    branches: [main, develop, feat/railway-github-cd] # last branch for testing
 
 jobs:
   build:
