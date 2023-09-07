@@ -41,10 +41,13 @@ func GetTokenSecret() string {
 
 func GetServerBindAddress() string {
 	host, err := checkEnv("HOST")
-	Must(err)
+	if err != nil {
+		host = "0.0.0.0"
+	}
 	port, err := checkEnv("PORT")
-	Must(err)
-
+	if err != nil {
+		port = "9091"
+	}
 	return fmt.Sprintf("%s:%s", host, port)
 }
 
