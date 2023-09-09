@@ -11,7 +11,6 @@ import (
 	"github.com/pressly/goose/v3"
 
 	"github.com/soramon0/portfolio/src/internal/database"
-	_ "github.com/soramon0/portfolio/src/sql/schema" // Load migration files
 )
 
 type Store interface {
