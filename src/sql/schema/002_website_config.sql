@@ -1,5 +1,6 @@
 -- +goose Up
 CREATE TABLE website_configurations (
+  id UUID PRIMARY KEY,
   configuration_name VARCHAR(255) UNIQUE NOT NULL,
   configuration_value TEXT NOT NULL,
   description TEXT,

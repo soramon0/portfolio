@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/goombaio/namegenerator"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
@@ -16,6 +18,8 @@ import (
 type Store interface {
 	database.Querier
 	GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error)
+	CreateInitialWebsiteConfigs(ctx context.Context, configs []database.CreateWebsiteConfigParams) error
+	GetInitialWebsiteConfigParams() []database.CreateWebsiteConfigParams
 	QueryRow(query string, args ...any) *sql.Row
 	Exec(query string, args ...any) (sql.Result, error)
 	Close() error
@@ -68,4 +72,54 @@ func (s *psqlStore) GenerateUniqueUsername(ctx context.Context, retryCount int) 
 		return "", errors.New("failed to generate unique username")
 	}
 	return s.GenerateUniqueUsername(ctx, retryCount-1)
+}
+
+func (s *psqlStore) GetInitialWebsiteConfigParams() []database.CreateWebsiteConfigParams {
+	now := time.Now()
+	return []database.CreateWebsiteConfigParams{
+		{
+			ID:                 uuid.New(),
+			Active:             true,
+			CreatedAt:          now,
+			UpdatedAt:          now,
+			Description:        sql.NullString{},
+			ConfigurationName:  "allow_user_login",
+			ConfigurationValue: "disallow",
+		},
+		{
+			ID:                 uuid.New(),
+			Active:             true,
+			CreatedAt:          now,
+			UpdatedAt:          now,
+			Description:        sql.NullString{},
+			ConfigurationName:  "allow_user_register",
+			ConfigurationValue: "disallow",
+		},
+	}
+}
+
+func (s *psqlStore) CreateInitialWebsiteConfigs(ctx context.Context, cfgs []database.CreateWebsiteConfigParams) error {
+	if len(cfgs) == 0 {
+		return fmt.Errorf("website configurations cannot be empty")
+	}
+
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	qtx := s.Queries.WithTx(tx)
+
+	for _, c := range cfgs {
+		_, err := qtx.GetWebsiteConfigurationByName(ctx, c.ConfigurationName)
+		if err != sql.ErrNoRows {
+			return err
+		}
+
+		if _, err := qtx.CreateWebsiteConfig(ctx, c); err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }

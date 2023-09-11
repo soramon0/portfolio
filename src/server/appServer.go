@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
@@ -30,6 +31,11 @@ func NewAppServer(app *fiber.App, s store.Store, r *cache.Cache, vt *lib.Validat
 }
 
 func (a *AppServer) StartServer() {
+	wConfigs := a.Store.GetInitialWebsiteConfigParams()
+	if err := a.Store.CreateInitialWebsiteConfigs(context.Background(), wConfigs); err != nil {
+		a.Log.ErrorFatalF("could not create initial website configurations: %v", err)
+	}
+
 	if lib.GetDevelopmentMode() == "development" {
 		listenAndServe(a.App, a.Log)
 	} else {

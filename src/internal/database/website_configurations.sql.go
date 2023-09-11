@@ -7,16 +7,60 @@ package database
 
 import (
 	"context"
+	"database/sql"
+	"time"
+
+	"github.com/google/uuid"
 )
 
+const createWebsiteConfig = `-- name: CreateWebsiteConfig :one
+INSERT INTO website_configurations (id, created_at, updated_at, configuration_name, configuration_value, description, active)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, configuration_name, configuration_value, description, created_at, updated_at, active
+`
+
+type CreateWebsiteConfigParams struct {
+	ID                 uuid.UUID      `json:"id"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	ConfigurationName  string         `json:"configuration_name"`
+	ConfigurationValue string         `json:"configuration_value"`
+	Description        sql.NullString `json:"description"`
+	Active             bool           `json:"active"`
+}
+
+func (q *Queries) CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error) {
+	row := q.db.QueryRowContext(ctx, createWebsiteConfig,
+		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.ConfigurationName,
+		arg.ConfigurationValue,
+		arg.Description,
+		arg.Active,
+	)
+	var i WebsiteConfiguration
+	err := row.Scan(
+		&i.ID,
+		&i.ConfigurationName,
+		&i.ConfigurationValue,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Active,
+	)
+	return i, err
+}
+
 const getWebsiteConfigurationByName = `-- name: GetWebsiteConfigurationByName :one
-SELECT configuration_name, configuration_value, description, created_at, updated_at, active FROM website_configurations WHERE configuration_name = $1 LIMIT 1
+SELECT id, configuration_name, configuration_value, description, created_at, updated_at, active FROM website_configurations WHERE configuration_name = $1 LIMIT 1
 `
 
 func (q *Queries) GetWebsiteConfigurationByName(ctx context.Context, configurationName string) (WebsiteConfiguration, error) {
 	row := q.db.QueryRowContext(ctx, getWebsiteConfigurationByName, configurationName)
 	var i WebsiteConfiguration
 	err := row.Scan(
+		&i.ID,
 		&i.ConfigurationName,
 		&i.ConfigurationValue,
 		&i.Description,
@@ -28,7 +72,7 @@ func (q *Queries) GetWebsiteConfigurationByName(ctx context.Context, configurati
 }
 
 const getWebsiteConfigurations = `-- name: GetWebsiteConfigurations :many
-SELECT configuration_name, configuration_value, description, created_at, updated_at, active FROM website_configurations ORDER BY configuration_name
+SELECT id, configuration_name, configuration_value, description, created_at, updated_at, active FROM website_configurations ORDER BY configuration_name
 `
 
 func (q *Queries) GetWebsiteConfigurations(ctx context.Context) ([]WebsiteConfiguration, error) {
@@ -41,6 +85,7 @@ func (q *Queries) GetWebsiteConfigurations(ctx context.Context) ([]WebsiteConfig
 	for rows.Next() {
 		var i WebsiteConfiguration
 		if err := rows.Scan(
+			&i.ID,
 			&i.ConfigurationName,
 			&i.ConfigurationValue,
 			&i.Description,
