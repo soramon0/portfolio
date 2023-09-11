@@ -24,6 +24,7 @@ type User struct {
 }
 
 type WebsiteConfiguration struct {
+	ID                 uuid.UUID      `json:"id"`
 	ConfigurationName  string         `json:"configuration_name"`
 	ConfigurationValue string         `json:"configuration_value"`
 	Description        sql.NullString `json:"description"`

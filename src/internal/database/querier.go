@@ -14,6 +14,7 @@ type Querier interface {
 	CheckUserExistsByEmail(ctx context.Context, email string) (bool, error)
 	CheckUserExistsByUsername(ctx context.Context, username string) (bool, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error)
 	GetWebsiteConfigurationByName(ctx context.Context, configurationName string) (WebsiteConfiguration, error)
