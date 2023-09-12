@@ -53,7 +53,7 @@ type CreateUserParams struct {
 	Password  string    `json:"-"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
-	UserType  string    `json:"user_type"`
+	UserType  UserType  `json:"user_type"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -114,7 +114,7 @@ type GetUserByIdRow struct {
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	UserType  string    `json:"user_type"`
+	UserType  UserType  `json:"user_type"`
 }
 
 func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {

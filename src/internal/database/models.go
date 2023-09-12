@@ -13,6 +13,48 @@ import (
 	"github.com/google/uuid"
 )
 
+type UserType string
+
+const (
+	UserTypeAdmin UserType = "admin"
+	UserTypeUser  UserType = "user"
+)
+
+func (e *UserType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserType(s)
+	case string:
+		*e = UserType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserType: %T", src)
+	}
+	return nil
+}
+
+type NullUserType struct {
+	UserType UserType `json:"user_type"`
+	Valid    bool     `json:"valid"` // Valid is true if UserType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserType) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserType), nil
+}
+
 type WebsiteConfigValue string
 
 const (
@@ -62,7 +104,7 @@ type User struct {
 	Password  string    `json:"-"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
-	UserType  string    `json:"user_type"`
+	UserType  UserType  `json:"user_type"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

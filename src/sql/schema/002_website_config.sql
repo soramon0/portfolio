@@ -4,7 +4,7 @@
 DO
 $$
   BEGIN
-    CREATE TYPE WEBSTE_CONFIG_VALUE AS ENUM ('allow', 'disallow');
+    CREATE TYPE WEBSITE_CONFIG_VALUE AS ENUM ('allow', 'disallow');
   EXCEPTION
     WHEN duplicate_object THEN null;
   END
