@@ -91,7 +91,7 @@ func (a *Auth) Register(c *fiber.Ctx) error {
 		Email:     email,
 		Password:  string(password),
 		Username:  username,
-		UserType:  "user",
+		UserType:  database.UserTypeUser,
 		FirstName: "",
 		LastName:  "",
 	})

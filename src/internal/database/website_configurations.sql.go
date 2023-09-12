@@ -20,13 +20,13 @@ RETURNING id, configuration_name, configuration_value, description, created_at, 
 `
 
 type CreateWebsiteConfigParams struct {
-	ID                 uuid.UUID      `json:"id"`
-	CreatedAt          time.Time      `json:"created_at"`
-	UpdatedAt          time.Time      `json:"updated_at"`
-	ConfigurationName  string         `json:"configuration_name"`
-	ConfigurationValue string         `json:"configuration_value"`
-	Description        sql.NullString `json:"description"`
-	Active             bool           `json:"active"`
+	ID                 uuid.UUID          `json:"id"`
+	CreatedAt          time.Time          `json:"created_at"`
+	UpdatedAt          time.Time          `json:"updated_at"`
+	ConfigurationName  string             `json:"configuration_name"`
+	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
+	Description        sql.NullString     `json:"description"`
+	Active             bool               `json:"active"`
 }
 
 func (q *Queries) CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error) {

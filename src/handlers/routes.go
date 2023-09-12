@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/server"
 	"github.com/soramon0/portfolio/src/template"
 )
@@ -23,12 +24,12 @@ func Register(s *server.AppServer) {
 	authRouter := v1Router.Group("/auth")
 	authRouter.Post(
 		"/register",
-		m.WithWebsiteConfig("allow_user_register", "allow", "registration is disabled"),
+		m.WithWebsiteConfig("allow_user_register", database.WebsiteConfigValueAllow, "registration is disabled"),
 		authHandlers.Register,
 	)
 	authRouter.Post(
 		"/login",
-		m.WithWebsiteConfig("allow_user_login", "allow", "login is disabled"),
+		m.WithWebsiteConfig("allow_user_login", database.WebsiteConfigValueAllow, "login is disabled"),
 		authHandlers.Login,
 	)
 	authRouter.Post("/logout", authHandlers.Logout)

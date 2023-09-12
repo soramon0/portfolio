@@ -6,10 +6,96 @@ package database
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+type UserType string
+
+const (
+	UserTypeAdmin UserType = "admin"
+	UserTypeUser  UserType = "user"
+)
+
+func (e *UserType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserType(s)
+	case string:
+		*e = UserType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserType: %T", src)
+	}
+	return nil
+}
+
+type NullUserType struct {
+	UserType UserType `json:"user_type"`
+	Valid    bool     `json:"valid"` // Valid is true if UserType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserType) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserType), nil
+}
+
+type WebsiteConfigValue string
+
+const (
+	WebsiteConfigValueAllow    WebsiteConfigValue = "allow"
+	WebsiteConfigValueDisallow WebsiteConfigValue = "disallow"
+)
+
+func (e *WebsiteConfigValue) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = WebsiteConfigValue(s)
+	case string:
+		*e = WebsiteConfigValue(s)
+	default:
+		return fmt.Errorf("unsupported scan type for WebsiteConfigValue: %T", src)
+	}
+	return nil
+}
+
+type NullWebsiteConfigValue struct {
+	WebsiteConfigValue WebsiteConfigValue `json:"website_config_value"`
+	Valid              bool               `json:"valid"` // Valid is true if WebsiteConfigValue is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullWebsiteConfigValue) Scan(value interface{}) error {
+	if value == nil {
+		ns.WebsiteConfigValue, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.WebsiteConfigValue.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullWebsiteConfigValue) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.WebsiteConfigValue), nil
+}
 
 type User struct {
 	ID        uuid.UUID `json:"id"`
@@ -18,17 +104,17 @@ type User struct {
 	Password  string    `json:"-"`
 	FirstName string    `json:"first_name"`
 	LastName  string    `json:"last_name"`
-	UserType  string    `json:"user_type"`
+	UserType  UserType  `json:"user_type"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type WebsiteConfiguration struct {
-	ID                 uuid.UUID      `json:"id"`
-	ConfigurationName  string         `json:"configuration_name"`
-	ConfigurationValue string         `json:"configuration_value"`
-	Description        sql.NullString `json:"description"`
-	CreatedAt          time.Time      `json:"created_at"`
-	UpdatedAt          time.Time      `json:"updated_at"`
-	Active             bool           `json:"active"`
+	ID                 uuid.UUID          `json:"id"`
+	ConfigurationName  string             `json:"configuration_name"`
+	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
+	Description        sql.NullString     `json:"description"`
+	CreatedAt          time.Time          `json:"created_at"`
+	UpdatedAt          time.Time          `json:"updated_at"`
+	Active             bool               `json:"active"`
 }
