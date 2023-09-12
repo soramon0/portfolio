@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY,
   username VARCHAR(255) UNIQUE NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -14,4 +14,4 @@ CREATE TABLE users (
 ALTER TABLE users ADD CONSTRAINT user_type_check CHECK (user_type IN ('admin', 'user'));
 
 -- +goose Down
-DROP TABLE users;
+DROP TABLE IF EXISTS users;
