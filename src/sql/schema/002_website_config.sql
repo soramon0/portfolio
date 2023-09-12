@@ -1,15 +1,5 @@
 -- +goose Up
-
--- +goose StatementBegin
-DO
-$$
-  BEGIN
-    CREATE TYPE WEBSITE_CONFIG_VALUE AS ENUM ('allow', 'disallow');
-  EXCEPTION
-    WHEN duplicate_object THEN null;
-  END
-$$;
--- +goose StatementEnd
+CREATE TYPE WEBSITE_CONFIG_VALUE AS ENUM ('allow', 'disallow');
 
 CREATE TABLE IF NOT EXISTS website_configurations (
   id UUID PRIMARY KEY,
@@ -23,3 +13,5 @@ CREATE TABLE IF NOT EXISTS website_configurations (
 
 -- +goose Down
 DROP TABLE IF EXISTS website_configurations;
+DROP TYPE WEBSITE_CONFIG_VALUE;
+
