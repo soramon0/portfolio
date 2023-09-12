@@ -109,7 +109,7 @@ func (m *Middleware) WithAuthenticatedAdmin(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string) fiber.Handler {
+func (m *Middleware) WithWebsiteConfig(name string, value database.WebsiteConfigValue, errMsg string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		wc, err := m.store.GetWebsiteConfigurationByName(c.Context(), name)
 		if err != nil {
@@ -120,7 +120,7 @@ func (m *Middleware) WithWebsiteConfig(name string, value string, errMsg string)
 			return &fiber.Error{Code: fiber.StatusInternalServerError, Message: errMsg}
 		}
 
-		if !wc.Active || !strings.EqualFold(wc.ConfigurationValue, value) {
+		if !wc.Active || wc.ConfigurationValue != value {
 			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: errMsg}
 		}
 

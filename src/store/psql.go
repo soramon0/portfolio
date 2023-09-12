@@ -84,7 +84,7 @@ func (s *psqlStore) GetInitialWebsiteConfigParams() []database.CreateWebsiteConf
 			UpdatedAt:          now,
 			Description:        sql.NullString{},
 			ConfigurationName:  "allow_user_login",
-			ConfigurationValue: "disallow",
+			ConfigurationValue: database.WebsiteConfigValueDisallow,
 		},
 		{
 			ID:                 uuid.New(),
@@ -93,7 +93,7 @@ func (s *psqlStore) GetInitialWebsiteConfigParams() []database.CreateWebsiteConf
 			UpdatedAt:          now,
 			Description:        sql.NullString{},
 			ConfigurationName:  "allow_user_register",
-			ConfigurationValue: "disallow",
+			ConfigurationValue: database.WebsiteConfigValueDisallow,
 		},
 	}
 }

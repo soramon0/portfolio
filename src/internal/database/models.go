@@ -6,10 +6,54 @@ package database
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+type WebsiteConfigValue string
+
+const (
+	WebsiteConfigValueAllow    WebsiteConfigValue = "allow"
+	WebsiteConfigValueDisallow WebsiteConfigValue = "disallow"
+)
+
+func (e *WebsiteConfigValue) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = WebsiteConfigValue(s)
+	case string:
+		*e = WebsiteConfigValue(s)
+	default:
+		return fmt.Errorf("unsupported scan type for WebsiteConfigValue: %T", src)
+	}
+	return nil
+}
+
+type NullWebsiteConfigValue struct {
+	WebsiteConfigValue WebsiteConfigValue `json:"website_config_value"`
+	Valid              bool               `json:"valid"` // Valid is true if WebsiteConfigValue is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullWebsiteConfigValue) Scan(value interface{}) error {
+	if value == nil {
+		ns.WebsiteConfigValue, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.WebsiteConfigValue.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullWebsiteConfigValue) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.WebsiteConfigValue), nil
+}
 
 type User struct {
 	ID        uuid.UUID `json:"id"`
@@ -24,11 +68,11 @@ type User struct {
 }
 
 type WebsiteConfiguration struct {
-	ID                 uuid.UUID      `json:"id"`
-	ConfigurationName  string         `json:"configuration_name"`
-	ConfigurationValue string         `json:"configuration_value"`
-	Description        sql.NullString `json:"description"`
-	CreatedAt          time.Time      `json:"created_at"`
-	UpdatedAt          time.Time      `json:"updated_at"`
-	Active             bool           `json:"active"`
+	ID                 uuid.UUID          `json:"id"`
+	ConfigurationName  string             `json:"configuration_name"`
+	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
+	Description        sql.NullString     `json:"description"`
+	CreatedAt          time.Time          `json:"created_at"`
+	UpdatedAt          time.Time          `json:"updated_at"`
+	Active             bool               `json:"active"`
 }
