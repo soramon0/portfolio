@@ -102,7 +102,7 @@ func (m *Middleware) WithAuthenticatedAdmin(c *fiber.Ctx) error {
 	if user == nil {
 		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthentiacted"}
 	}
-	if user.UserType != "admin" {
+	if user.UserType != database.UserTypeAdmin {
 		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthentiacted"}
 	}
 
