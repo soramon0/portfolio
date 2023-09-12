@@ -63,7 +63,7 @@ func TestCreateUsers(t *testing.T) {
 				Email:     "test1@email.com",
 				Password:  "password",
 				Username:  "username1",
-				UserType:  "user",
+				UserType:  database.UserTypeUser,
 				FirstName: "",
 				LastName:  "",
 			},
@@ -82,7 +82,7 @@ func TestCreateUsers(t *testing.T) {
 				Email:     "test2@email.com",
 				Password:  "password",
 				Username:  "username2",
-				UserType:  "admin",
+				UserType:  database.UserTypeAdmin,
 				FirstName: "",
 				LastName:  "",
 			},
@@ -114,11 +114,11 @@ func TestCreateUsers(t *testing.T) {
 				if !ok {
 					return true, fmt.Errorf("CreateUser() err.(type) = %v; want err.(*pq.Error)", err)
 				}
-				if pgErr.Code.Name() != "check_violation" {
-					return true, fmt.Errorf("CreateUser() err.Code = %v; want check_violation", pgErr.Code.Name())
+				if pgErr.Code.Name() != "invalid_text_representation" {
+					return true, fmt.Errorf("CreateUser() err.Code = %v; want invalid_text_representation", pgErr.Code.Name())
 				}
-				if !strings.Contains(pgErr.Error(), `"users" violates check constraint "user_type_check"`) {
-					return true, fmt.Errorf("CreateUser() err.Error = %v; want check constraint sub string", pgErr.Error())
+				if !strings.Contains(pgErr.Error(), `input value for enum user_type: "wrong type"`) {
+					return true, fmt.Errorf("CreateUser() err.Error = %v; want enum type error	", pgErr.Error())
 				}
 
 				return true, nil
