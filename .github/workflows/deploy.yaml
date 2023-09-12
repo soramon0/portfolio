@@ -1,4 +1,4 @@
-name: Build & Deploy
+name: Build, Test & Deploy to Railway
 
 on:
   push:
@@ -8,8 +8,9 @@ on:
       - develop
 
 jobs:
-  build:
+  build-test:
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     services:
       db:
         image: postgres:15.4
@@ -69,8 +70,7 @@ jobs:
 
   deploy-develop:
     runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -85,8 +85,7 @@ jobs:
 
   deploy-production:
     runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
