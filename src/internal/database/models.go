@@ -13,6 +13,48 @@ import (
 	"github.com/google/uuid"
 )
 
+type FileType string
+
+const (
+	FileTypeImage    FileType = "image"
+	FileTypeDocument FileType = "document"
+)
+
+func (e *FileType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = FileType(s)
+	case string:
+		*e = FileType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for FileType: %T", src)
+	}
+	return nil
+}
+
+type NullFileType struct {
+	FileType FileType `json:"file_type"`
+	Valid    bool     `json:"valid"` // Valid is true if FileType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullFileType) Scan(value interface{}) error {
+	if value == nil {
+		ns.FileType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.FileType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullFileType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.FileType), nil
+}
+
 type UserType string
 
 const (
@@ -95,6 +137,30 @@ func (ns NullWebsiteConfigValue) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.WebsiteConfigValue), nil
+}
+
+type File struct {
+	ID         int32          `json:"id"`
+	Url        string         `json:"url"`
+	Alt        string         `json:"alt"`
+	Name       sql.NullString `json:"name"`
+	Type       FileType       `json:"type"`
+	UploadedAt time.Time      `json:"uploaded_at"`
+	ProjectID  uuid.NullUUID  `json:"project_id"`
+}
+
+type Project struct {
+	ID           uuid.UUID      `json:"id"`
+	Name         string         `json:"name"`
+	Description  string         `json:"description"`
+	ClientName   string         `json:"client_name"`
+	LiveLink     sql.NullString `json:"live_link"`
+	CodeLink     sql.NullString `json:"code_link"`
+	StartDate    time.Time      `json:"start_date"`
+	EndDate      sql.NullTime   `json:"end_date"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	CoverImageID sql.NullInt32  `json:"cover_image_id"`
 }
 
 type User struct {

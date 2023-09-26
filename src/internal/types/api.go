@@ -3,7 +3,7 @@ package types
 import "github.com/soramon0/portfolio/src/internal/database"
 
 type possibleReturns interface {
-	database.User | []database.User | any
+	database.User | []database.User | []database.ListProjectsRow | any
 }
 
 type APIListResponse[T possibleReturns] struct {
