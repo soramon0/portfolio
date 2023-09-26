@@ -42,6 +42,10 @@ func Register(s *server.AppServer) {
 	adminUsersRouter.Get("/", usersHandlers.GetUsers)
 	adminUsersRouter.Get("/:id", usersHandlers.GetUserById)
 
+	projectHandlers := NewProjects(s.Store, s.Log)
+	projectsRouter := v1Router.Group("/projects")
+	projectsRouter.Get("/", projectHandlers.GetProjects)
+
 	apiRoutes.Use(
 		func(c *fiber.Ctx) error {
 			return &fiber.Error{Code: fiber.StatusNotFound, Message: "Maybe you are lost"}
