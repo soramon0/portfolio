@@ -20,6 +20,7 @@ type Store interface {
 	GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error)
 	CreateInitialWebsiteConfigs(ctx context.Context, configs []database.CreateWebsiteConfigParams) error
 	GetInitialWebsiteConfigParams() []database.CreateWebsiteConfigParams
+	ListProjectsWithGallery(ctx context.Context) ([]ProjectWithGallary, error)
 	QueryRow(query string, args ...any) *sql.Row
 	Exec(query string, args ...any) (sql.Result, error)
 	Close() error
