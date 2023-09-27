@@ -61,7 +61,7 @@ type ListProjectsRow struct {
 	ClientName     string      `json:"client_name"`
 	Name           string      `json:"name"`
 	Description    string      `json:"description"`
-	LiveLink       null.String `json:"live_link"`
+	LiveLink       null.String `json:"live_link,omitempty"`
 	CodeLink       null.String `json:"code_link"`
 	StartDate      time.Time   `json:"start_date"`
 	EndDate        null.Time   `json:"end_date"`

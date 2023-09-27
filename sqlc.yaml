@@ -15,6 +15,12 @@ sql:
           - column: "users.password"
             go_struct_tag: 'json:"-"'
 
+          # Omit empty types in json responses 
+          # Iusse: does not work currently with github.com/guregu/null.v4
+          # Issue link: https://github.com/golang/go/issues/11939
+          - column: "projects.live_link"
+            go_struct_tag: 'json:"live_link,omitempty"'
+
             # override sql.NullString and friends using null package
           - db_type: "timestamptz"
             nullable: true
