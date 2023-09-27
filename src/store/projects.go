@@ -19,34 +19,30 @@ func (s *psqlStore) ListProjectsWithGallery(ctx context.Context) ([]ProjectWithG
 		return nil, err
 	}
 
-	projects := make([]ProjectWithGallary, 0, len(rows))
-	for _, row := range rows {
-		var i ProjectWithGallary
-
-		i.ID = row.ID
-		i.ClientName = row.ClientName
-		i.Name = row.Name
-		i.Description = row.Description
-		i.LiveLink = row.LiveLink
-		i.CodeLink = row.CodeLink
-		i.StartDate = row.StartDate
-		i.EndDate = row.EndDate
-		i.CreatedAt = row.CreatedAt
-		i.UpdatedAt = row.UpdatedAt
-		i.CoverImageName = row.CoverImageName
-		i.CoverImageUrl = row.CoverImageUrl
-		i.CoverImageAlt = row.CoverImageAlt
+	projects := make([]ProjectWithGallary, len(rows))
+	for i, row := range rows {
+		projects[i].ID = row.ID
+		projects[i].ClientName = row.ClientName
+		projects[i].Name = row.Name
+		projects[i].Description = row.Description
+		projects[i].LiveLink = row.LiveLink
+		projects[i].CodeLink = row.CodeLink
+		projects[i].StartDate = row.StartDate
+		projects[i].EndDate = row.EndDate
+		projects[i].CreatedAt = row.CreatedAt
+		projects[i].UpdatedAt = row.UpdatedAt
+		projects[i].CoverImageName = row.CoverImageName
+		projects[i].CoverImageUrl = row.CoverImageUrl
+		projects[i].CoverImageAlt = row.CoverImageAlt
 
 		v, ok := row.Gallery.([]byte)
 		if !ok {
 			return nil, errors.New("failed to convert gallery to bytes")
 		}
 
-		if err := json.Unmarshal(v, &i.Gallery); err != nil {
+		if err := json.Unmarshal(v, &projects[i].Gallery); err != nil {
 			return nil, err
 		}
-
-		projects = append(projects, i)
 	}
 
 	return projects, nil
