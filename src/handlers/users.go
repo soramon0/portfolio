@@ -38,7 +38,7 @@ func (u *Users) GetUsers(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch users"}
 	}
 
-	return c.JSON(types.NewAPIListResponse(users, len(users)))
+	return c.JSON(types.NewAPIListResponse(users, int64(len(users)), 1))
 }
 
 func (u *Users) GetUserById(ctx *fiber.Ctx) error {

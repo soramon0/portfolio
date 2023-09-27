@@ -7,9 +7,10 @@ type possibleReturns interface {
 }
 
 type APIListResponse[T possibleReturns] struct {
-	Data  T         `json:"data"`
-	Count int       `json:"count"`
-	Error *APIError `json:"error,omitempty"`
+	Data       T         `json:"data"`
+	Count      int64     `json:"count"`
+	TotalPages int64     `json:"total_pages"`
+	Error      *APIError `json:"error,omitempty"`
 }
 
 type APIResponse[T possibleReturns] struct {
@@ -17,10 +18,11 @@ type APIResponse[T possibleReturns] struct {
 	Error *APIError `json:"error,omitempty"`
 }
 
-func NewAPIListResponse[T possibleReturns](data T, count int) APIListResponse[T] {
+func NewAPIListResponse[T possibleReturns](data T, count, totalPages int64) APIListResponse[T] {
 	return APIListResponse[T]{
-		Data:  data,
-		Count: count,
+		Data:       data,
+		Count:      count,
+		TotalPages: totalPages,
 	}
 }
 

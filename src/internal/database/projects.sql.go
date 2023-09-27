@@ -13,6 +13,18 @@ import (
 	null "gopkg.in/guregu/null.v4"
 )
 
+const CountPublishedProjects = `-- name: CountPublishedProjects :one
+SELECT count(*) FROM projects
+WHERE published_at IS NOT NULL
+`
+
+func (q *Queries) CountPublishedProjects(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, CountPublishedProjects)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const ListPublishedProjects = `-- name: ListPublishedProjects :many
 SELECT
   p.id,

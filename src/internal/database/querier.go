@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	CheckUserExistsByEmail(ctx context.Context, email string) (bool, error)
 	CheckUserExistsByUsername(ctx context.Context, username string) (bool, error)
+	CountPublishedProjects(ctx context.Context) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)

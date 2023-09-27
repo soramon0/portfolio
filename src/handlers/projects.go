@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"math"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/internal/types"
@@ -43,5 +45,12 @@ func (p *Projects) GetProjects(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch projects"}
 	}
 
-	return c.JSON(types.NewAPIListResponse(projects, len(projects)))
+	count, err := p.store.CountPublishedProjects(c.Context())
+	if err != nil {
+		p.log.ErrorF("failed to count projects: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch projects"}
+	}
+
+	totalPages := int64(math.Ceil(float64(count) / float64(size)))
+	return c.JSON(types.NewAPIListResponse(projects, count, totalPages))
 }

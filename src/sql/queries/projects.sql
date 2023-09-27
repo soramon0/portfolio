@@ -43,3 +43,6 @@ ORDER BY
   p.id, p.created_at
 LIMIT $1 OFFSET $2;
 
+-- name: CountPublishedProjects :one
+SELECT count(*) FROM projects
+WHERE published_at IS NOT NULL;
