@@ -29,7 +29,7 @@ type Store interface {
 	GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error)
 	CreateInitialWebsiteConfigs(ctx context.Context, configs []database.CreateWebsiteConfigParams) error
 	GetInitialWebsiteConfigParams() []database.CreateWebsiteConfigParams
-	ListProjectsWithGallery(ctx context.Context) ([]ProjectWithGallary, error)
+	ListProjectsWithGallery(ctx context.Context, arg database.ListPublishedProjectsParams) ([]ProjectWithGallary, error)
 }
 
 type psqlStore struct {

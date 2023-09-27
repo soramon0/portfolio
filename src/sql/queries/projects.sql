@@ -40,5 +40,6 @@ ON
 WHERE
   p.published_at IS NOT NULL
 ORDER BY
-  p.id;
+  p.id, p.created_at
+LIMIT $1 OFFSET $2;
 

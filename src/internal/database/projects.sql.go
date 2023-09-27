@@ -55,8 +55,14 @@ ON
 WHERE
   p.published_at IS NOT NULL
 ORDER BY
-  p.id
+  p.id, p.created_at
+LIMIT $1 OFFSET $2
 `
+
+type ListPublishedProjectsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
 
 type ListPublishedProjectsRow struct {
 	ID             uuid.UUID   `json:"id"`
@@ -75,8 +81,8 @@ type ListPublishedProjectsRow struct {
 	Gallery        interface{} `json:"gallery"`
 }
 
-func (q *Queries) ListPublishedProjects(ctx context.Context) ([]ListPublishedProjectsRow, error) {
-	rows, err := q.db.QueryContext(ctx, ListPublishedProjects)
+func (q *Queries) ListPublishedProjects(ctx context.Context, arg ListPublishedProjectsParams) ([]ListPublishedProjectsRow, error) {
+	rows, err := q.db.QueryContext(ctx, ListPublishedProjects, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

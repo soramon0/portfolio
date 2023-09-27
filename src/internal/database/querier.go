@@ -19,7 +19,7 @@ type Querier interface {
 	GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error)
 	GetWebsiteConfigurationByName(ctx context.Context, configurationName string) (WebsiteConfiguration, error)
 	GetWebsiteConfigurations(ctx context.Context) ([]WebsiteConfiguration, error)
-	ListPublishedProjects(ctx context.Context) ([]ListPublishedProjectsRow, error)
+	ListPublishedProjects(ctx context.Context, arg ListPublishedProjectsParams) ([]ListPublishedProjectsRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
 }
 

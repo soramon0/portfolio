@@ -13,8 +13,8 @@ type ProjectWithGallary struct {
 	Gallery []database.File `json:"gallery"`
 }
 
-func (s *psqlStore) ListProjectsWithGallery(ctx context.Context) ([]ProjectWithGallary, error) {
-	rows, err := s.Queries.ListPublishedProjects(ctx)
+func (s *psqlStore) ListProjectsWithGallery(ctx context.Context, arg database.ListPublishedProjectsParams) ([]ProjectWithGallary, error) {
+	rows, err := s.Queries.ListPublishedProjects(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
