@@ -3,52 +3,51 @@ package store
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/soramon0/portfolio/src/internal/database"
 )
 
 type ProjectWithGallary struct {
-	database.Project
+	database.ListProjectsRow
 	Gallery []database.File `json:"gallery"`
 }
 
 func (s *psqlStore) ListProjectsWithGallery(ctx context.Context) ([]ProjectWithGallary, error) {
-	rows, err := s.db.QueryContext(ctx, database.ListProjects)
+	rows, err := s.Queries.ListProjects(ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	items := []ProjectWithGallary{}
-	for rows.Next() {
+
+	projects := make([]ProjectWithGallary, 0, len(rows))
+	for _, row := range rows {
 		var i ProjectWithGallary
-		var imagesJson []byte
-		if err := rows.Scan(
-			&i.ID,
-			&i.ClientName,
-			&i.Name,
-			&i.Description,
-			&i.LiveLink,
-			&i.CodeLink,
-			&i.StartDate,
-			&i.EndDate,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&imagesJson,
-		); err != nil {
+
+		i.ID = row.ID
+		i.ClientName = row.ClientName
+		i.Name = row.Name
+		i.Description = row.Description
+		i.LiveLink = row.LiveLink
+		i.CodeLink = row.CodeLink
+		i.StartDate = row.StartDate
+		i.EndDate = row.EndDate
+		i.CreatedAt = row.CreatedAt
+		i.UpdatedAt = row.UpdatedAt
+		i.CoverImageName = row.CoverImageName
+		i.CoverImageUrl = row.CoverImageUrl
+		i.CoverImageAlt = row.CoverImageAlt
+
+		v, ok := row.Gallery.([]byte)
+		if !ok {
+			return nil, errors.New("failed to convert gallery to bytes")
+		}
+
+		if err := json.Unmarshal(v, &i.Gallery); err != nil {
 			return nil, err
 		}
 
-		if err := json.Unmarshal(imagesJson, &i.Gallery); err != nil {
-			return nil, err
-		}
+		projects = append(projects, i)
+	}
 
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+	return projects, nil
 }

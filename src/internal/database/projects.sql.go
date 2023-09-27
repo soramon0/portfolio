@@ -25,6 +25,9 @@ SELECT
   p.end_date,
   p.created_at,
   p.updated_at,
+  f.name as cover_image_name,
+  f.url as cover_image_url,
+  f.alt as cover_image_alt,
   COALESCE(
     (
       SELECT 
@@ -45,22 +48,29 @@ SELECT
   ) AS gallery
 FROM
   projects AS p
+LEFT JOIN
+  files as f
+ON
+  f.id = p.cover_image_id
 ORDER BY
   p.id
 `
 
 type ListProjectsRow struct {
-	ID          uuid.UUID   `json:"id"`
-	ClientName  string      `json:"client_name"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	LiveLink    null.String `json:"live_link"`
-	CodeLink    null.String `json:"code_link"`
-	StartDate   time.Time   `json:"start_date"`
-	EndDate     null.Time   `json:"end_date"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-	Gallery     interface{} `json:"gallery"`
+	ID             uuid.UUID   `json:"id"`
+	ClientName     string      `json:"client_name"`
+	Name           string      `json:"name"`
+	Description    string      `json:"description"`
+	LiveLink       null.String `json:"live_link"`
+	CodeLink       null.String `json:"code_link"`
+	StartDate      time.Time   `json:"start_date"`
+	EndDate        null.Time   `json:"end_date"`
+	CreatedAt      time.Time   `json:"created_at"`
+	UpdatedAt      time.Time   `json:"updated_at"`
+	CoverImageName null.String `json:"cover_image_name"`
+	CoverImageUrl  null.String `json:"cover_image_url"`
+	CoverImageAlt  null.String `json:"cover_image_alt"`
+	Gallery        interface{} `json:"gallery"`
 }
 
 func (q *Queries) ListProjects(ctx context.Context) ([]ListProjectsRow, error) {
@@ -83,6 +93,9 @@ func (q *Queries) ListProjects(ctx context.Context) ([]ListProjectsRow, error) {
 			&i.EndDate,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.CoverImageName,
+			&i.CoverImageUrl,
+			&i.CoverImageAlt,
 			&i.Gallery,
 		); err != nil {
 			return nil, err

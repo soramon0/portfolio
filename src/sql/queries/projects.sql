@@ -10,6 +10,9 @@ SELECT
   p.end_date,
   p.created_at,
   p.updated_at,
+  f.name as cover_image_name,
+  f.url as cover_image_url,
+  f.alt as cover_image_alt,
   COALESCE(
     (
       SELECT 
@@ -30,6 +33,10 @@ SELECT
   ) AS gallery
 FROM
   projects AS p
+LEFT JOIN
+  files as f
+ON
+  f.id = p.cover_image_id
 ORDER BY
   p.id;
 
