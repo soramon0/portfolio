@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"math"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/internal/types"
@@ -24,33 +22,37 @@ func NewProjects(s store.Store, l *lib.AppLogger) *Projects {
 }
 
 func (p *Projects) GetProjects(c *fiber.Ctx) error {
-	page := c.QueryInt("page", 1)
-	size := c.QueryInt("size", 10)
+	paginator := NewOffsetPaginator[[]store.ProjectWithGallary](c.QueryInt("page", 1), c.QueryInt("size", 10))
 
-	if page <= 0 {
-		page = 1
-	}
+	result, err := paginator.Paginate(func(limit, offset int) (*PaginatorResult[[]store.ProjectWithGallary], error) {
+		projects, err := p.store.ListProjectsWithGallery(c.Context(), database.ListPublishedProjectsParams{
+			Limit:  int32(limit),
+			Offset: int32(offset),
+		})
 
-	if size > 10 || size <= 0 {
-		size = 10
-	}
+		if err != nil {
+			p.log.ErrorF("could not fetch projects: %v\n", err)
+			return nil, &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch projects"}
+		}
 
-	projects, err := p.store.ListProjectsWithGallery(c.Context(), database.ListPublishedProjectsParams{
-		Limit:  int32(size),
-		Offset: int32(size) * int32(page-1),
+		count, err := p.store.CountPublishedProjects(c.Context())
+		if err != nil {
+			p.log.ErrorF("failed to count projects: %v\n", err)
+			return nil, &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch projects"}
+		}
+
+		p := PaginatorResult[[]store.ProjectWithGallary]{
+			Count:      count,
+			TotalPages: paginator.GetTotalPages(count),
+			Data:       projects,
+		}
+
+		return &p, nil
 	})
 
 	if err != nil {
-		p.log.ErrorF("could not fetch projects: %v\n", err)
-		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch projects"}
+		return err
 	}
 
-	count, err := p.store.CountPublishedProjects(c.Context())
-	if err != nil {
-		p.log.ErrorF("failed to count projects: %v\n", err)
-		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch projects"}
-	}
-
-	totalPages := int64(math.Ceil(float64(count) / float64(size)))
-	return c.JSON(types.NewAPIListResponse(projects, count, totalPages))
+	return c.JSON(types.NewAPIListResponse(result.Data, result.Count, result.TotalPages))
 }
