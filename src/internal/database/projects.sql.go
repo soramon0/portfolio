@@ -13,7 +13,7 @@ import (
 	null "gopkg.in/guregu/null.v4"
 )
 
-const ListProjects = `-- name: ListProjects :many
+const ListPublishedProjects = `-- name: ListPublishedProjects :many
 SELECT
   p.id,
   p.client_name,
@@ -52,11 +52,13 @@ LEFT JOIN
   files as f
 ON
   f.id = p.cover_image_id
+WHERE
+  p.published_at IS NOT NULL
 ORDER BY
   p.id
 `
 
-type ListProjectsRow struct {
+type ListPublishedProjectsRow struct {
 	ID             uuid.UUID   `json:"id"`
 	ClientName     string      `json:"client_name"`
 	Name           string      `json:"name"`
@@ -73,15 +75,15 @@ type ListProjectsRow struct {
 	Gallery        interface{} `json:"gallery"`
 }
 
-func (q *Queries) ListProjects(ctx context.Context) ([]ListProjectsRow, error) {
-	rows, err := q.db.QueryContext(ctx, ListProjects)
+func (q *Queries) ListPublishedProjects(ctx context.Context) ([]ListPublishedProjectsRow, error) {
+	rows, err := q.db.QueryContext(ctx, ListPublishedProjects)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []ListProjectsRow{}
+	items := []ListPublishedProjectsRow{}
 	for rows.Next() {
-		var i ListProjectsRow
+		var i ListPublishedProjectsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ClientName,

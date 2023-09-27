@@ -158,6 +158,7 @@ type Project struct {
 	CodeLink     null.String   `json:"code_link"`
 	StartDate    time.Time     `json:"start_date"`
 	EndDate      null.Time     `json:"end_date"`
+	PublishedAt  null.Time     `json:"published_at"`
 	CreatedAt    time.Time     `json:"created_at"`
 	UpdatedAt    time.Time     `json:"updated_at"`
 	CoverImageID uuid.NullUUID `json:"cover_image_id"`

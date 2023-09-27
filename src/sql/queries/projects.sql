@@ -1,4 +1,4 @@
--- name: ListProjects :many
+-- name: ListPublishedProjects :many
 SELECT
   p.id,
   p.client_name,
@@ -37,6 +37,8 @@ LEFT JOIN
   files as f
 ON
   f.id = p.cover_image_id
+WHERE
+  p.published_at IS NOT NULL
 ORDER BY
   p.id;
 

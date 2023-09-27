@@ -9,12 +9,12 @@ import (
 )
 
 type ProjectWithGallary struct {
-	database.ListProjectsRow
+	database.ListPublishedProjectsRow
 	Gallery []database.File `json:"gallery"`
 }
 
 func (s *psqlStore) ListProjectsWithGallery(ctx context.Context) ([]ProjectWithGallary, error) {
-	rows, err := s.Queries.ListProjects(ctx)
+	rows, err := s.Queries.ListPublishedProjects(ctx)
 	if err != nil {
 		return nil, err
 	}

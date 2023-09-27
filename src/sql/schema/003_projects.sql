@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS projects (
   live_link TEXT,
   code_link TEXT,
   start_date DATE NOT NULL,
-  end_date Date,
+  end_date DATE,
+  published_at DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
