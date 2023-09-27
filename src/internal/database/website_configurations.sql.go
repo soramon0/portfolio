@@ -7,13 +7,13 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	null "gopkg.in/guregu/null.v4"
 )
 
-const createWebsiteConfig = `-- name: CreateWebsiteConfig :one
+const CreateWebsiteConfig = `-- name: CreateWebsiteConfig :one
 INSERT INTO website_configurations (id, created_at, updated_at, configuration_name, configuration_value, description, active)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id, configuration_name, configuration_value, description, created_at, updated_at, active
@@ -25,12 +25,12 @@ type CreateWebsiteConfigParams struct {
 	UpdatedAt          time.Time          `json:"updated_at"`
 	ConfigurationName  string             `json:"configuration_name"`
 	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
-	Description        sql.NullString     `json:"description"`
+	Description        null.String        `json:"description"`
 	Active             bool               `json:"active"`
 }
 
 func (q *Queries) CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error) {
-	row := q.db.QueryRowContext(ctx, createWebsiteConfig,
+	row := q.db.QueryRowContext(ctx, CreateWebsiteConfig,
 		arg.ID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -52,12 +52,12 @@ func (q *Queries) CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConf
 	return i, err
 }
 
-const getWebsiteConfigurationByName = `-- name: GetWebsiteConfigurationByName :one
+const GetWebsiteConfigurationByName = `-- name: GetWebsiteConfigurationByName :one
 SELECT id, configuration_name, configuration_value, description, created_at, updated_at, active FROM website_configurations WHERE configuration_name = $1 LIMIT 1
 `
 
 func (q *Queries) GetWebsiteConfigurationByName(ctx context.Context, configurationName string) (WebsiteConfiguration, error) {
-	row := q.db.QueryRowContext(ctx, getWebsiteConfigurationByName, configurationName)
+	row := q.db.QueryRowContext(ctx, GetWebsiteConfigurationByName, configurationName)
 	var i WebsiteConfiguration
 	err := row.Scan(
 		&i.ID,
@@ -71,12 +71,12 @@ func (q *Queries) GetWebsiteConfigurationByName(ctx context.Context, configurati
 	return i, err
 }
 
-const getWebsiteConfigurations = `-- name: GetWebsiteConfigurations :many
+const GetWebsiteConfigurations = `-- name: GetWebsiteConfigurations :many
 SELECT id, configuration_name, configuration_value, description, created_at, updated_at, active FROM website_configurations ORDER BY configuration_name
 `
 
 func (q *Queries) GetWebsiteConfigurations(ctx context.Context) ([]WebsiteConfiguration, error) {
-	rows, err := q.db.QueryContext(ctx, getWebsiteConfigurations)
+	rows, err := q.db.QueryContext(ctx, GetWebsiteConfigurations)
 	if err != nil {
 		return nil, err
 	}

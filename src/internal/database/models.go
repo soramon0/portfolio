@@ -5,12 +5,12 @@
 package database
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	null "gopkg.in/guregu/null.v4"
 )
 
 type FileType string
@@ -140,27 +140,27 @@ func (ns NullWebsiteConfigValue) Value() (driver.Value, error) {
 }
 
 type File struct {
-	ID         int32          `json:"id"`
-	Url        string         `json:"url"`
-	Alt        string         `json:"alt"`
-	Name       sql.NullString `json:"name"`
-	Type       FileType       `json:"type"`
-	UploadedAt time.Time      `json:"uploaded_at"`
-	ProjectID  uuid.NullUUID  `json:"project_id"`
+	ID         uuid.UUID     `json:"id"`
+	Url        string        `json:"url"`
+	Alt        string        `json:"alt"`
+	Name       null.String   `json:"name"`
+	Type       FileType      `json:"type"`
+	UploadedAt time.Time     `json:"uploaded_at"`
+	ProjectID  uuid.NullUUID `json:"project_id"`
 }
 
 type Project struct {
-	ID           uuid.UUID      `json:"id"`
-	Name         string         `json:"name"`
-	Description  string         `json:"description"`
-	ClientName   string         `json:"client_name"`
-	LiveLink     sql.NullString `json:"live_link"`
-	CodeLink     sql.NullString `json:"code_link"`
-	StartDate    time.Time      `json:"start_date"`
-	EndDate      sql.NullTime   `json:"end_date"`
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	CoverImageID sql.NullInt32  `json:"cover_image_id"`
+	ID           uuid.UUID     `json:"id"`
+	Name         string        `json:"name"`
+	Description  string        `json:"description"`
+	ClientName   string        `json:"client_name"`
+	LiveLink     null.String   `json:"live_link"`
+	CodeLink     null.String   `json:"code_link"`
+	StartDate    time.Time     `json:"start_date"`
+	EndDate      null.Time     `json:"end_date"`
+	CreatedAt    time.Time     `json:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at"`
+	CoverImageID uuid.NullUUID `json:"cover_image_id"`
 }
 
 type User struct {
@@ -179,7 +179,7 @@ type WebsiteConfiguration struct {
 	ID                 uuid.UUID          `json:"id"`
 	ConfigurationName  string             `json:"configuration_name"`
 	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
-	Description        sql.NullString     `json:"description"`
+	Description        null.String        `json:"description"`
 	CreatedAt          time.Time          `json:"created_at"`
 	UpdatedAt          time.Time          `json:"updated_at"`
 	Active             bool               `json:"active"`

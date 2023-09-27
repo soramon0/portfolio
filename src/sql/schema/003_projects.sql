@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE TYPE FILE_TYPE AS ENUM ('image', 'document');
 
 CREATE TABLE IF NOT EXISTS files (
-  id SERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY,
   url TEXT NOT NULL,
   alt TEXT NOT NULL,
   name TEXT,
@@ -33,7 +33,7 @@ REFERENCES projects(id) ON DELETE CASCADE;
 -- Project(file): One to one
 -- projects can have one cover image
 ALTER TABLE projects
-ADD COLUMN cover_image_id INT UNIQUE,
+ADD COLUMN cover_image_id UUID UNIQUE,
 ADD CONSTRAINT fk_project_file FOREIGN KEY (cover_image_id)
 REFERENCES files(id) ON DELETE SET NULL;
 

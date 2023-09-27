@@ -11,20 +11,25 @@ import (
 	"github.com/goombaio/namegenerator"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
+	"gopkg.in/guregu/null.v4"
 
 	"github.com/soramon0/portfolio/src/internal/database"
 )
 
 type Store interface {
 	database.Querier
-	GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error)
-	CreateInitialWebsiteConfigs(ctx context.Context, configs []database.CreateWebsiteConfigParams) error
-	GetInitialWebsiteConfigParams() []database.CreateWebsiteConfigParams
-	ListProjectsWithGallery(ctx context.Context) ([]ProjectWithGallary, error)
+
+	// used db management cases
 	QueryRow(query string, args ...any) *sql.Row
 	Exec(query string, args ...any) (sql.Result, error)
 	Close() error
 	Migrate(dir string, command string, arguments ...string) error
+
+	// business related methods
+	GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error)
+	CreateInitialWebsiteConfigs(ctx context.Context, configs []database.CreateWebsiteConfigParams) error
+	GetInitialWebsiteConfigParams() []database.CreateWebsiteConfigParams
+	ListProjectsWithGallery(ctx context.Context) ([]ProjectWithGallary, error)
 }
 
 type psqlStore struct {
@@ -83,7 +88,7 @@ func (s *psqlStore) GetInitialWebsiteConfigParams() []database.CreateWebsiteConf
 			Active:             true,
 			CreatedAt:          now,
 			UpdatedAt:          now,
-			Description:        sql.NullString{},
+			Description:        null.NewString("", false),
 			ConfigurationName:  "allow_user_login",
 			ConfigurationValue: database.WebsiteConfigValueDisallow,
 		},
@@ -92,7 +97,7 @@ func (s *psqlStore) GetInitialWebsiteConfigParams() []database.CreateWebsiteConf
 			Active:             true,
 			CreatedAt:          now,
 			UpdatedAt:          now,
-			Description:        sql.NullString{},
+			Description:        null.NewString("", false),
 			ConfigurationName:  "allow_user_register",
 			ConfigurationValue: database.WebsiteConfigValueDisallow,
 		},

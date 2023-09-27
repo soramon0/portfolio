@@ -7,13 +7,13 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	null "gopkg.in/guregu/null.v4"
 )
 
-const listProjects = `-- name: ListProjects :many
+const ListProjects = `-- name: ListProjects :many
 SELECT
   p.id,
   p.client_name,
@@ -50,21 +50,21 @@ ORDER BY
 `
 
 type ListProjectsRow struct {
-	ID          uuid.UUID      `json:"id"`
-	ClientName  string         `json:"client_name"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	LiveLink    sql.NullString `json:"live_link"`
-	CodeLink    sql.NullString `json:"code_link"`
-	StartDate   time.Time      `json:"start_date"`
-	EndDate     sql.NullTime   `json:"end_date"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	Gallery     interface{}    `json:"gallery"`
+	ID          uuid.UUID   `json:"id"`
+	ClientName  string      `json:"client_name"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	LiveLink    null.String `json:"live_link"`
+	CodeLink    null.String `json:"code_link"`
+	StartDate   time.Time   `json:"start_date"`
+	EndDate     null.Time   `json:"end_date"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+	Gallery     interface{} `json:"gallery"`
 }
 
 func (q *Queries) ListProjects(ctx context.Context) ([]ListProjectsRow, error) {
-	rows, err := q.db.QueryContext(ctx, listProjects)
+	rows, err := q.db.QueryContext(ctx, ListProjects)
 	if err != nil {
 		return nil, err
 	}
