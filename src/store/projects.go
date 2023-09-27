@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 
 	"github.com/soramon0/portfolio/src/internal/database"
 )
@@ -37,7 +37,7 @@ func (s *psqlStore) ListProjectsWithGallery(ctx context.Context) ([]ProjectWithG
 
 		v, ok := row.Gallery.([]byte)
 		if !ok {
-			return nil, errors.New("failed to convert gallery to bytes")
+			return nil, fmt.Errorf("failed to convert gallery(%T) to bytes", row.Gallery)
 		}
 
 		if err := json.Unmarshal(v, &projects[i].Gallery); err != nil {
