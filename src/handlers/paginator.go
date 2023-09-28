@@ -8,7 +8,7 @@ type Paginator[T any] interface {
 	GetOffset() int
 	GetTotalPages(count int64) int64
 
-	Paginate(paginate func(limit, offset int) (*PaginatorResult[T], error)) (*PaginatorResult[T], error)
+	Paginate(paginate func(limit, offset int) (data T, count int64, err error)) (*PaginatorResult[T], error)
 }
 
 type PaginatorResult[T any] struct {
@@ -51,6 +51,15 @@ func (p *OffsetPaginator[T]) GetTotalPages(count int64) int64 {
 	return int64(math.Ceil(float64(count) / float64(p.GetLimit())))
 }
 
-func (p *OffsetPaginator[T]) Paginate(paginate func(limit, offset int) (*PaginatorResult[T], error)) (*PaginatorResult[T], error) {
-	return paginate(p.GetLimit(), p.GetOffset())
+func (p *OffsetPaginator[T]) Paginate(paginate func(limit, offset int) (data T, count int64, err error)) (*PaginatorResult[T], error) {
+	data, count, err := paginate(p.GetLimit(), p.GetOffset())
+	if err != nil {
+		return nil, err
+	}
+
+	return &PaginatorResult[T]{
+		Count:      count,
+		TotalPages: p.GetTotalPages(count),
+		Data:       data,
+	}, nil
 }
