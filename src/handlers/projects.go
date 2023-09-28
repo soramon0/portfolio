@@ -53,7 +53,6 @@ func (p *Projects) GetProjects(c *fiber.Ctx) error {
 
 	if err != nil {
 		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: err.Error()}
-
 	}
 
 	return c.JSON(types.NewAPIListResponse(result.Data, result.Count, result.TotalPages))
