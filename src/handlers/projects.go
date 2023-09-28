@@ -25,8 +25,9 @@ func NewProjects(s store.Store, l *lib.AppLogger) *Projects {
 }
 
 func (p *Projects) GetProjects(c *fiber.Ctx) error {
+	paginatorHeader := c.Get("X-Paginator", string(paginator.OffsetPaginatorType))
 	paginator := paginator.NewPaginator[[]store.ProjectWithGallary](
-		paginator.ParsePaginatorType(c.Get("X-Paginator", string(paginator.OffsetPaginatorType))),
+		paginator.ParsePaginatorType(paginatorHeader),
 		c.QueryInt("page", 1),
 		c.QueryInt("size", 10),
 	)
