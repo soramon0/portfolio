@@ -1,6 +1,20 @@
-package handlers
+package paginator
 
 import "math"
+
+type PaginatorType string
+
+const (
+	OffsetPaginatorType PaginatorType = "offset"
+	CursorPaginatorType PaginatorType = "cursor"
+)
+
+func ParsePaginatorType(paginator string) PaginatorType {
+	if paginator == string(OffsetPaginatorType) || paginator == string(CursorPaginatorType) {
+		return PaginatorType(paginator)
+	}
+	return OffsetPaginatorType
+}
 
 type Paginator[T any] interface {
 	GetPage() int
@@ -9,6 +23,14 @@ type Paginator[T any] interface {
 	GetTotalPages(count int64) int64
 
 	Paginate(paginate func(limit, offset int) (data T, count int64, err error)) (*PaginatorResult[T], error)
+}
+
+func NewPaginator[T any](paginator PaginatorType, page, size int) Paginator[T] {
+	if paginator == OffsetPaginatorType {
+		return NewOffsetPaginator[T](page, size)
+	}
+	// TODO(sora): replace with cursor paginator
+	return NewOffsetPaginator[T](page, size)
 }
 
 type PaginatorResult[T any] struct {
