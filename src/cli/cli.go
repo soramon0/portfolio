@@ -14,8 +14,8 @@ type Cli struct {
 
 func NewCli(l *lib.AppLogger) *Cli {
 	app := &cli.App{
-		Name:        "Sora",
-		Description: "sora commander",
+		Name:        "portfolio",
+		Description: "CLI for managing soramon0 portfolio",
 		Commands: []*cli.Command{
 			newDBCommand(),
 			newAdminCommand(),
