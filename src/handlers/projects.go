@@ -26,14 +26,14 @@ func NewProjects(s store.Store, l *lib.AppLogger) *Projects {
 
 func (p *Projects) GetProjects(c *fiber.Ctx) error {
 	paginatorHeader := c.Get("X-Paginator", string(paginator.OffsetPaginatorType))
-	paginator := paginator.NewPaginator[[]store.ProjectWithGallary](
+	paginator := paginator.NewPaginator[[]database.ListPublishedProjectsRow](
 		paginator.ParsePaginatorType(paginatorHeader),
 		c.QueryInt("page", 1),
 		c.QueryInt("size", 10),
 	)
 
-	result, err := paginator.Paginate(func(limit, offset int) ([]store.ProjectWithGallary, int64, error) {
-		projects, err := p.store.ListProjectsWithGallery(c.Context(), database.ListPublishedProjectsParams{
+	result, err := paginator.Paginate(func(limit, offset int) ([]database.ListPublishedProjectsRow, int64, error) {
+		projects, err := p.store.ListPublishedProjects(c.Context(), database.ListPublishedProjectsParams{
 			Limit:  int32(limit),
 			Offset: int32(offset),
 		})

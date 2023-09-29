@@ -16,6 +16,7 @@ type Querier interface {
 	CountPublishedProjects(ctx context.Context) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error)
+	GetPublishedProjectBySlug(ctx context.Context, slug string) (GetPublishedProjectBySlugRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error)
 	GetWebsiteConfigurationByName(ctx context.Context, configurationName string) (WebsiteConfiguration, error)

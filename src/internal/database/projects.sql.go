@@ -25,7 +25,7 @@ func (q *Queries) CountPublishedProjects(ctx context.Context) (int64, error) {
 	return count, err
 }
 
-const ListPublishedProjects = `-- name: ListPublishedProjects :many
+const GetPublishedProjectBySlug = `-- name: GetPublishedProjectBySlug :one
 SELECT
   p.id,
   p.client_name,
@@ -68,6 +68,79 @@ LEFT JOIN
 ON
   f.id = p.cover_image_id
 WHERE
+  p.published_at IS NOT NULL AND slug = $1
+`
+
+type GetPublishedProjectBySlugRow struct {
+	ID             uuid.UUID   `json:"id"`
+	ClientName     string      `json:"client_name"`
+	Name           string      `json:"name"`
+	Slug           string      `json:"slug"`
+	Subtitle       string      `json:"subtitle"`
+	Description    string      `json:"description"`
+	LiveLink       null.String `json:"live_link,omitempty"`
+	CodeLink       null.String `json:"code_link"`
+	StartDate      time.Time   `json:"start_date"`
+	EndDate        null.Time   `json:"end_date"`
+	LaunchDate     null.Time   `json:"launch_date"`
+	CreatedAt      time.Time   `json:"created_at"`
+	UpdatedAt      time.Time   `json:"updated_at"`
+	CoverImageName null.String `json:"cover_image_name"`
+	CoverImageUrl  null.String `json:"cover_image_url"`
+	CoverImageAlt  null.String `json:"cover_image_alt"`
+	Gallery        interface{} `json:"gallery"`
+}
+
+func (q *Queries) GetPublishedProjectBySlug(ctx context.Context, slug string) (GetPublishedProjectBySlugRow, error) {
+	row := q.db.QueryRowContext(ctx, GetPublishedProjectBySlug, slug)
+	var i GetPublishedProjectBySlugRow
+	err := row.Scan(
+		&i.ID,
+		&i.ClientName,
+		&i.Name,
+		&i.Slug,
+		&i.Subtitle,
+		&i.Description,
+		&i.LiveLink,
+		&i.CodeLink,
+		&i.StartDate,
+		&i.EndDate,
+		&i.LaunchDate,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CoverImageName,
+		&i.CoverImageUrl,
+		&i.CoverImageAlt,
+		&i.Gallery,
+	)
+	return i, err
+}
+
+const ListPublishedProjects = `-- name: ListPublishedProjects :many
+SELECT
+  p.id,
+  p.client_name,
+  p.name,
+  p.slug,
+  p.subtitle,
+  p.description,
+  p.live_link,
+  p.code_link,
+  p.start_date,
+  p.end_date,
+  p.launch_date,
+  p.created_at,
+  p.updated_at,
+  f.name as cover_image_name,
+  f.url as cover_image_url,
+  f.alt as cover_image_alt
+FROM
+  projects AS p
+LEFT JOIN
+  files as f
+ON
+  f.id = p.cover_image_id
+WHERE
   p.published_at IS NOT NULL
 ORDER BY
   p.id, p.created_at
@@ -96,7 +169,6 @@ type ListPublishedProjectsRow struct {
 	CoverImageName null.String `json:"cover_image_name"`
 	CoverImageUrl  null.String `json:"cover_image_url"`
 	CoverImageAlt  null.String `json:"cover_image_alt"`
-	Gallery        interface{} `json:"gallery"`
 }
 
 func (q *Queries) ListPublishedProjects(ctx context.Context, arg ListPublishedProjectsParams) ([]ListPublishedProjectsRow, error) {
@@ -125,7 +197,6 @@ func (q *Queries) ListPublishedProjects(ctx context.Context, arg ListPublishedPr
 			&i.CoverImageName,
 			&i.CoverImageUrl,
 			&i.CoverImageAlt,
-			&i.Gallery,
 		); err != nil {
 			return nil, err
 		}
