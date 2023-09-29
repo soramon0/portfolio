@@ -18,6 +18,7 @@ func NewCli(l *lib.AppLogger) *Cli {
 		Description: "sora commander",
 		Commands: []*cli.Command{
 			newDBCommand(),
+			newAdminCommand(),
 		},
 	}
 
