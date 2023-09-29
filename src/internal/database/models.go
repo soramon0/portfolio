@@ -152,12 +152,14 @@ type File struct {
 type Project struct {
 	ID           uuid.UUID     `json:"id"`
 	Name         string        `json:"name"`
+	Subtitle     string        `json:"subtitle"`
 	Description  string        `json:"description"`
 	ClientName   string        `json:"client_name"`
 	LiveLink     null.String   `json:"live_link,omitempty"`
 	CodeLink     null.String   `json:"code_link"`
 	StartDate    time.Time     `json:"start_date"`
 	EndDate      null.Time     `json:"end_date"`
+	LaunchDate   null.Time     `json:"launch_date"`
 	PublishedAt  null.Time     `json:"published_at"`
 	CreatedAt    time.Time     `json:"created_at"`
 	UpdatedAt    time.Time     `json:"updated_at"`

@@ -24,11 +24,13 @@ func (s *psqlStore) ListProjectsWithGallery(ctx context.Context, arg database.Li
 		projects[i].ID = row.ID
 		projects[i].ClientName = row.ClientName
 		projects[i].Name = row.Name
+		projects[i].Subtitle = row.Subtitle
 		projects[i].Description = row.Description
 		projects[i].LiveLink = row.LiveLink
 		projects[i].CodeLink = row.CodeLink
 		projects[i].StartDate = row.StartDate
 		projects[i].EndDate = row.EndDate
+		projects[i].LaunchDate = row.LaunchDate
 		projects[i].CreatedAt = row.CreatedAt
 		projects[i].UpdatedAt = row.UpdatedAt
 		projects[i].CoverImageName = row.CoverImageName

@@ -2,12 +2,14 @@
 CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  subtitle VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   client_name VARCHAR(255) NOT NULL,
   live_link TEXT,
   code_link TEXT,
   start_date DATE NOT NULL,
   end_date DATE,
+  launch_date DATE,
   published_at DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP

@@ -30,11 +30,13 @@ SELECT
   p.id,
   p.client_name,
   p.name,
+  p.subtitle,
   p.description,
   p.live_link,
   p.code_link,
   p.start_date,
   p.end_date,
+  p.launch_date,
   p.created_at,
   p.updated_at,
   f.name as cover_image_name,
@@ -80,11 +82,13 @@ type ListPublishedProjectsRow struct {
 	ID             uuid.UUID   `json:"id"`
 	ClientName     string      `json:"client_name"`
 	Name           string      `json:"name"`
+	Subtitle       string      `json:"subtitle"`
 	Description    string      `json:"description"`
 	LiveLink       null.String `json:"live_link,omitempty"`
 	CodeLink       null.String `json:"code_link"`
 	StartDate      time.Time   `json:"start_date"`
 	EndDate        null.Time   `json:"end_date"`
+	LaunchDate     null.Time   `json:"launch_date"`
 	CreatedAt      time.Time   `json:"created_at"`
 	UpdatedAt      time.Time   `json:"updated_at"`
 	CoverImageName null.String `json:"cover_image_name"`
@@ -106,11 +110,13 @@ func (q *Queries) ListPublishedProjects(ctx context.Context, arg ListPublishedPr
 			&i.ID,
 			&i.ClientName,
 			&i.Name,
+			&i.Subtitle,
 			&i.Description,
 			&i.LiveLink,
 			&i.CodeLink,
 			&i.StartDate,
 			&i.EndDate,
+			&i.LaunchDate,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.CoverImageName,
