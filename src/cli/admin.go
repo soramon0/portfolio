@@ -121,6 +121,40 @@ func newAdminCommand() *cli.Command {
 					return err
 				},
 			},
+			{
+				Name:  "remove-admin",
+				Usage: "Remove current admin user",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "id",
+						Aliases:  []string{"i"},
+						Usage:    "admin user ID",
+						Required: true,
+					},
+				},
+				Action: func(ctx *cli.Context) error {
+					db, err := store.NewStore(lib.GetDatabaseURL())
+					if err != nil {
+						return err
+					}
+					defer db.Close()
+
+					id, err := uuid.Parse(ctx.String("id"))
+					if err != nil {
+						return err
+					}
+
+					row := db.QueryRow("SELECT EXISTS (SELECT * FROM users WHERE user_type = 'admin' AND id = $1 LIMIT 1);", id.String())
+					var exists bool
+					if err := row.Scan(&exists); err != nil {
+						return nil
+					}
+					if !exists {
+						return errors.New("no admin found")
+					}
+					return db.QueryRow("DELETE FROM users where user_type = 'admin' AND id = $1;", id.String()).Err()
+				},
+			},
 		},
 	}
 }
