@@ -30,6 +30,7 @@ SELECT
   p.id,
   p.client_name,
   p.name,
+  p.slug,
   p.subtitle,
   p.description,
   p.live_link,
@@ -82,6 +83,7 @@ type ListPublishedProjectsRow struct {
 	ID             uuid.UUID   `json:"id"`
 	ClientName     string      `json:"client_name"`
 	Name           string      `json:"name"`
+	Slug           string      `json:"slug"`
 	Subtitle       string      `json:"subtitle"`
 	Description    string      `json:"description"`
 	LiveLink       null.String `json:"live_link,omitempty"`
@@ -110,6 +112,7 @@ func (q *Queries) ListPublishedProjects(ctx context.Context, arg ListPublishedPr
 			&i.ID,
 			&i.ClientName,
 			&i.Name,
+			&i.Slug,
 			&i.Subtitle,
 			&i.Description,
 			&i.LiveLink,

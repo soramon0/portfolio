@@ -3,6 +3,7 @@ SELECT
   p.id,
   p.client_name,
   p.name,
+  p.slug,
   p.subtitle,
   p.description,
   p.live_link,

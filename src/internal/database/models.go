@@ -152,6 +152,7 @@ type File struct {
 type Project struct {
 	ID           uuid.UUID     `json:"id"`
 	Name         string        `json:"name"`
+	Slug         string        `json:"slug"`
 	Subtitle     string        `json:"subtitle"`
 	Description  string        `json:"description"`
 	ClientName   string        `json:"client_name"`

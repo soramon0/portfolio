@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
+  slug TEXT NOT NULL,
   subtitle VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   client_name VARCHAR(255) NOT NULL,
