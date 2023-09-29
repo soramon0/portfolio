@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/soramon0/portfolio/src/handlers/paginator"
@@ -22,6 +24,21 @@ func NewProjects(s store.Store, l *lib.AppLogger) *Projects {
 		store: s,
 		log:   l,
 	}
+}
+
+func (p *Projects) GetProjectBySlug(c *fiber.Ctx) error {
+	slug := strings.ToLower(c.Params("slug"))
+	project, err := p.store.GetPublishedProject(c.Context(), slug)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return &fiber.Error{Code: fiber.StatusNotFound, Message: "project not found"}
+		}
+
+		p.log.ErrorF("failed to fetch project: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "failed to fetch project"}
+	}
+
+	return c.JSON(types.NewAPIResponse(project))
 }
 
 func (p *Projects) GetProjects(c *fiber.Ctx) error {

@@ -45,6 +45,7 @@ func Register(s *server.AppServer) {
 	projectHandlers := NewProjects(s.Store, s.Log)
 	projectsRouter := v1Router.Group("/projects")
 	projectsRouter.Get("/", projectHandlers.GetProjects)
+	projectsRouter.Get("/:slug", projectHandlers.GetProjectBySlug)
 
 	apiRoutes.Use(
 		func(c *fiber.Ctx) error {
