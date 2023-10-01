@@ -30,7 +30,7 @@ func newAdminCommand() *cli.Command {
 		Subcommands: []*cli.Command{
 			{
 				Name:  "create-admin",
-				Usage: "database migrations",
+				Usage: "creates the initial admin",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "email",
