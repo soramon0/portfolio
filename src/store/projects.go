@@ -37,6 +37,7 @@ func (s *psqlStore) GetPublishedProject(ctx context.Context, slug string) (Proje
 	project.Subtitle = row.Subtitle
 	project.Description = row.Description
 	project.Technologies = row.Technologies
+	project.Credits = row.Credits
 	project.LiveLink = row.LiveLink
 	project.CodeLink = row.CodeLink
 	project.StartDate = row.StartDate

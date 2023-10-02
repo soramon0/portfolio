@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS projects (
   subtitle VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   technologies TEXT[],
+  credits TEXT[],
   client_name VARCHAR(255) NOT NULL,
   live_link TEXT,
   code_link TEXT,

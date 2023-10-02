@@ -38,6 +38,7 @@ SELECT
   p.code_link,
   p.start_date,
   p.technologies,
+  p.credits,
   p.end_date,
   p.launch_date,
   p.created_at,
@@ -84,6 +85,7 @@ type GetPublishedProjectBySlugRow struct {
 	CodeLink       null.String `json:"code_link"`
 	StartDate      time.Time   `json:"start_date"`
 	Technologies   []string    `json:"technologies"`
+	Credits        []string    `json:"credits"`
 	EndDate        null.Time   `json:"end_date"`
 	LaunchDate     null.Time   `json:"launch_date"`
 	CreatedAt      time.Time   `json:"created_at"`
@@ -108,6 +110,7 @@ func (q *Queries) GetPublishedProjectBySlug(ctx context.Context, slug string) (G
 		&i.CodeLink,
 		&i.StartDate,
 		pq.Array(&i.Technologies),
+		pq.Array(&i.Credits),
 		&i.EndDate,
 		&i.LaunchDate,
 		&i.CreatedAt,

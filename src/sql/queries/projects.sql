@@ -37,6 +37,7 @@ SELECT
   p.code_link,
   p.start_date,
   p.technologies,
+  p.credits,
   p.end_date,
   p.launch_date,
   p.created_at,
