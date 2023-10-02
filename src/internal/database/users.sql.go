@@ -12,33 +12,33 @@ import (
 	"github.com/google/uuid"
 )
 
-const checkUserExistsByEmail = `-- name: CheckUserExistsByEmail :one
+const CheckUserExistsByEmail = `-- name: CheckUserExistsByEmail :one
 SELECT EXISTS (
   SELECT 1 FROM users WHERE email = $1
 )
 `
 
 func (q *Queries) CheckUserExistsByEmail(ctx context.Context, email string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, checkUserExistsByEmail, email)
+	row := q.db.QueryRowContext(ctx, CheckUserExistsByEmail, email)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
 }
 
-const checkUserExistsByUsername = `-- name: CheckUserExistsByUsername :one
+const CheckUserExistsByUsername = `-- name: CheckUserExistsByUsername :one
 SELECT EXISTS (
   SELECT 1 FROM users WHERE username = $1
 )
 `
 
 func (q *Queries) CheckUserExistsByUsername(ctx context.Context, username string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, checkUserExistsByUsername, username)
+	row := q.db.QueryRowContext(ctx, CheckUserExistsByUsername, username)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
 }
 
-const createUser = `-- name: CreateUser :one
+const CreateUser = `-- name: CreateUser :one
 INSERT INTO users (id, created_at, updated_at, username, email, password, first_name, last_name, user_type)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING id, username, email, password, first_name, last_name, user_type, created_at, updated_at
@@ -57,7 +57,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
+	row := q.db.QueryRowContext(ctx, CreateUser,
 		arg.ID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -83,12 +83,12 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
-const getUserByEmail = `-- name: GetUserByEmail :one
+const GetUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, username, email, password, first_name, last_name, user_type, created_at, updated_at FROM users WHERE email = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	row := q.db.QueryRowContext(ctx, GetUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -104,7 +104,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	return i, err
 }
 
-const getUserById = `-- name: GetUserById :one
+const GetUserById = `-- name: GetUserById :one
 SELECT id, username, email, created_at, updated_at, user_type FROM users WHERE id = $1 LIMIT 1
 `
 
@@ -118,7 +118,7 @@ type GetUserByIdRow struct {
 }
 
 func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, id)
+	row := q.db.QueryRowContext(ctx, GetUserById, id)
 	var i GetUserByIdRow
 	err := row.Scan(
 		&i.ID,
@@ -131,12 +131,12 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow
 	return i, err
 }
 
-const listUsers = `-- name: ListUsers :many
+const ListUsers = `-- name: ListUsers :many
 SELECT id, username, email, password, first_name, last_name, user_type, created_at, updated_at FROM users ORDER BY username
 `
 
 func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, listUsers)
+	rows, err := q.db.QueryContext(ctx, ListUsers)
 	if err != nil {
 		return nil, err
 	}

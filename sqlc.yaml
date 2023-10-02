@@ -8,7 +8,45 @@ sql:
         emit_json_tags: true
         emit_interface: true
         emit_empty_slices: true
+        emit_exported_queries: true
         out: "src/internal/database"
         overrides:
+          # Do not send password in json responses
           - column: "users.password"
-            go_struct_tag: "json:\"-\""
+            go_struct_tag: 'json:"-"'
+
+          # Omit empty types in json responses 
+          # Iusse: does not work currently with github.com/guregu/null.v4
+          # Issue link: https://github.com/golang/go/issues/11939
+          - column: "projects.live_link"
+            go_struct_tag: 'json:"live_link,omitempty"'
+
+            # override sql.NullString and friends using null package
+          - db_type: "timestamptz"
+            nullable: true
+            engine: "postgresql"
+            go_type:
+              import: "gopkg.in/guregu/null.v4"
+              package: "null"
+              type: "Time"
+          - db_type: "date"
+            nullable: true
+            engine: "postgresql"
+            go_type:
+              import: "gopkg.in/guregu/null.v4"
+              package: "null"
+              type: "Time"
+          - db_type: "int"
+            nullable: true
+            engine: "postgresql"
+            go_type:
+              import: "gopkg.in/guregu/null.v4"
+              package: "null"
+              type: "Int"
+          - db_type: "text"
+            nullable: true
+            engine: "postgresql"
+            go_type:
+              import: "gopkg.in/guregu/null.v4"
+              package: "null"
+              type: "String"

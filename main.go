@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/soramon0/portfolio/src/cache"
+	"github.com/soramon0/portfolio/src/cli"
 	"github.com/soramon0/portfolio/src/configs"
 	"github.com/soramon0/portfolio/src/handlers"
 	"github.com/soramon0/portfolio/src/lib"
@@ -13,9 +16,12 @@ import (
 )
 
 func main() {
+	if len(os.Args) >= 2 {
+		cli.NewCli(lib.NewLogger()).Run(os.Args)
+	}
+
 	logger := lib.NewLogger()
 	app := fiber.New(configs.FiberConfig())
-
 	db, err := store.NewStore(lib.GetDatabaseURL())
 	if err != nil {
 		logger.ErrorFatalF("could not connect to postgres: %v", err)

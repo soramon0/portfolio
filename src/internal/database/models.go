@@ -5,13 +5,55 @@
 package database
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	null "gopkg.in/guregu/null.v4"
 )
+
+type FileType string
+
+const (
+	FileTypeImage    FileType = "image"
+	FileTypeDocument FileType = "document"
+)
+
+func (e *FileType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = FileType(s)
+	case string:
+		*e = FileType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for FileType: %T", src)
+	}
+	return nil
+}
+
+type NullFileType struct {
+	FileType FileType `json:"file_type"`
+	Valid    bool     `json:"valid"` // Valid is true if FileType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullFileType) Scan(value interface{}) error {
+	if value == nil {
+		ns.FileType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.FileType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullFileType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.FileType), nil
+}
 
 type UserType string
 
@@ -97,6 +139,36 @@ func (ns NullWebsiteConfigValue) Value() (driver.Value, error) {
 	return string(ns.WebsiteConfigValue), nil
 }
 
+type File struct {
+	ID         uuid.UUID     `json:"id"`
+	Url        string        `json:"url"`
+	Alt        string        `json:"alt"`
+	Name       null.String   `json:"name"`
+	Type       FileType      `json:"type"`
+	UploadedAt time.Time     `json:"uploaded_at"`
+	ProjectID  uuid.NullUUID `json:"project_id"`
+}
+
+type Project struct {
+	ID           uuid.UUID     `json:"id"`
+	Name         string        `json:"name"`
+	Slug         string        `json:"slug"`
+	Subtitle     string        `json:"subtitle"`
+	Description  string        `json:"description"`
+	Technologies []string      `json:"technologies"`
+	Credits      []string      `json:"credits"`
+	ClientName   string        `json:"client_name"`
+	LiveLink     null.String   `json:"live_link,omitempty"`
+	CodeLink     null.String   `json:"code_link"`
+	StartDate    time.Time     `json:"start_date"`
+	EndDate      null.Time     `json:"end_date"`
+	LaunchDate   null.Time     `json:"launch_date"`
+	PublishedAt  null.Time     `json:"published_at"`
+	CreatedAt    time.Time     `json:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at"`
+	CoverImageID uuid.NullUUID `json:"cover_image_id"`
+}
+
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	Username  string    `json:"username"`
@@ -113,7 +185,7 @@ type WebsiteConfiguration struct {
 	ID                 uuid.UUID          `json:"id"`
 	ConfigurationName  string             `json:"configuration_name"`
 	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
-	Description        sql.NullString     `json:"description"`
+	Description        null.String        `json:"description"`
 	CreatedAt          time.Time          `json:"created_at"`
 	UpdatedAt          time.Time          `json:"updated_at"`
 	Active             bool               `json:"active"`
