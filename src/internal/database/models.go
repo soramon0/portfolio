@@ -155,6 +155,7 @@ type Project struct {
 	Slug         string        `json:"slug"`
 	Subtitle     string        `json:"subtitle"`
 	Description  string        `json:"description"`
+	Technologies []string      `json:"technologies"`
 	ClientName   string        `json:"client_name"`
 	LiveLink     null.String   `json:"live_link,omitempty"`
 	CodeLink     null.String   `json:"code_link"`

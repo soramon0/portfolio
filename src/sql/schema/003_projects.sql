@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS projects (
   slug TEXT NOT NULL,
   subtitle VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
+  technologies TEXT[],
   client_name VARCHAR(255) NOT NULL,
   live_link TEXT,
   code_link TEXT,
