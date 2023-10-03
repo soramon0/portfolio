@@ -43,7 +43,7 @@ func (ca *Categories) GetCategories(c *fiber.Ctx) error {
 			return nil, 0, errors.New("failed to fetch categories")
 		}
 
-		count, err := ca.store.CountPublishedProjects(c.Context())
+		count, err := ca.store.CountCategories(c.Context())
 		if err != nil {
 			ca.log.ErrorF("failed to count categories: %v\n", err)
 			return nil, 0, errors.New("failed to fetch categories")
