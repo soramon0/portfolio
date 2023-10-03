@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	CheckUserExistsByEmail(ctx context.Context, email string) (bool, error)
 	CheckUserExistsByUsername(ctx context.Context, username string) (bool, error)
+	CountCategories(ctx context.Context) (int64, error)
 	CountPublishedProjects(ctx context.Context) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error)
@@ -21,6 +22,7 @@ type Querier interface {
 	GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error)
 	GetWebsiteConfigurationByName(ctx context.Context, configurationName string) (WebsiteConfiguration, error)
 	GetWebsiteConfigurations(ctx context.Context) ([]WebsiteConfiguration, error)
+	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListPublishedProjects(ctx context.Context, arg ListPublishedProjectsParams) ([]ListPublishedProjectsRow, error)
 	ListUsers(ctx context.Context) ([]User, error)
 }

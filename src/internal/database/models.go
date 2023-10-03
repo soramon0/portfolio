@@ -139,6 +139,13 @@ func (ns NullWebsiteConfigValue) Value() (driver.Value, error) {
 	return string(ns.WebsiteConfigValue), nil
 }
 
+type Category struct {
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type File struct {
 	ID         uuid.UUID     `json:"id"`
 	Url        string        `json:"url"`
@@ -167,6 +174,11 @@ type Project struct {
 	CreatedAt    time.Time     `json:"created_at"`
 	UpdatedAt    time.Time     `json:"updated_at"`
 	CoverImageID uuid.NullUUID `json:"cover_image_id"`
+}
+
+type ProjectsCategory struct {
+	CategoryID uuid.UUID `json:"category_id"`
+	ProjectID  uuid.UUID `json:"project_id"`
 }
 
 type User struct {

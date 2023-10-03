@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/lib/pq"
 	"github.com/soramon0/portfolio/src/internal/database"
 )
 
@@ -30,6 +31,17 @@ func (s *psqlStore) GetPublishedProject(ctx context.Context, slug string) (Proje
 		return project, err
 	}
 
+	// try to convert categories to string array
+	// if err, ignore it and return empty array
+	categories := make([]string, 0)
+	pq.Array(&categories).Scan(row.Categories)
+
+	// so that we return an empty array in unmarshling
+	// intead of nil
+	if row.Credits == nil {
+		row.Credits = make([]string, 0)
+	}
+
 	project.ID = row.ID
 	project.ClientName = row.ClientName
 	project.Name = row.Name
@@ -37,6 +49,7 @@ func (s *psqlStore) GetPublishedProject(ctx context.Context, slug string) (Proje
 	project.Subtitle = row.Subtitle
 	project.Description = row.Description
 	project.Technologies = row.Technologies
+	project.Categories = categories
 	project.Credits = row.Credits
 	project.LiveLink = row.LiveLink
 	project.CodeLink = row.CodeLink

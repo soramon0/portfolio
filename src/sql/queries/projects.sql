@@ -42,9 +42,10 @@ SELECT
   p.launch_date,
   p.created_at,
   p.updated_at,
-  f.name as cover_image_name,
-  f.url as cover_image_url,
-  f.alt as cover_image_alt,
+  f.name AS cover_image_name,
+  f.url AS cover_image_url,
+  f.alt AS cover_image_alt,
+  ARRAY_AGG(categories.name) AS categories,
   COALESCE(
     (
       SELECT 
@@ -66,8 +67,12 @@ SELECT
 FROM
   projects AS p
 LEFT JOIN
-  files as f
-ON
-  f.id = p.cover_image_id
+  files as f ON f.id = p.cover_image_id
+LEFT JOIN
+  projects_categories ON p.id = projects_categories.project_id
+LEFT JOIN
+  categories ON categories.id = projects_categories.category_id
 WHERE
-  p.published_at IS NOT NULL AND slug = $1;
+  p.published_at IS NOT NULL AND slug = $1
+GROUP BY
+  p.id, f.name, f.url, f.alt;
