@@ -42,6 +42,10 @@ func Register(s *server.AppServer) {
 	adminUsersRouter.Get("/", usersHandlers.GetUsers)
 	adminUsersRouter.Get("/:id", usersHandlers.GetUserById)
 
+	categoriesHandlers := NewCategories(s.Store, s.Log)
+	categoriesRouter := v1Router.Group("/categories")
+	categoriesRouter.Get("/", categoriesHandlers.GetCategories)
+
 	projectHandlers := NewProjects(s.Store, s.Log)
 	projectsRouter := v1Router.Group("/projects")
 	projectsRouter.Get("/", projectHandlers.GetProjects)
