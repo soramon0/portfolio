@@ -7,9 +7,8 @@ package database
 import (
 	"database/sql/driver"
 	"fmt"
-	"time"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	null "gopkg.in/guregu/null.v4"
 )
 
@@ -140,65 +139,65 @@ func (ns NullWebsiteConfigValue) Value() (driver.Value, error) {
 }
 
 type Category struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        pgtype.UUID        `json:"id"`
+	Name      string             `json:"name"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type File struct {
-	ID         uuid.UUID     `json:"id"`
-	Url        string        `json:"url"`
-	Alt        string        `json:"alt"`
-	Name       null.String   `json:"name"`
-	Type       FileType      `json:"type"`
-	UploadedAt time.Time     `json:"uploaded_at"`
-	ProjectID  uuid.NullUUID `json:"project_id"`
+	ID         pgtype.UUID        `json:"id"`
+	Url        string             `json:"url"`
+	Alt        string             `json:"alt"`
+	Name       null.String        `json:"name"`
+	Type       FileType           `json:"type"`
+	UploadedAt pgtype.Timestamptz `json:"uploaded_at"`
+	ProjectID  pgtype.UUID        `json:"project_id"`
 }
 
 type Project struct {
-	ID           uuid.UUID     `json:"id"`
-	Name         string        `json:"name"`
-	Slug         string        `json:"slug"`
-	Subtitle     string        `json:"subtitle"`
-	Description  string        `json:"description"`
-	Technologies []string      `json:"technologies"`
-	Credits      []string      `json:"credits"`
-	ClientName   string        `json:"client_name"`
-	LiveLink     null.String   `json:"live_link,omitempty"`
-	CodeLink     null.String   `json:"code_link"`
-	StartDate    time.Time     `json:"start_date"`
-	EndDate      null.Time     `json:"end_date"`
-	LaunchDate   null.Time     `json:"launch_date"`
-	PublishedAt  null.Time     `json:"published_at"`
-	CreatedAt    time.Time     `json:"created_at"`
-	UpdatedAt    time.Time     `json:"updated_at"`
-	CoverImageID uuid.NullUUID `json:"cover_image_id"`
+	ID           pgtype.UUID        `json:"id"`
+	Name         string             `json:"name"`
+	Slug         string             `json:"slug"`
+	Subtitle     string             `json:"subtitle"`
+	Description  string             `json:"description"`
+	Technologies []string           `json:"technologies"`
+	Credits      []string           `json:"credits"`
+	ClientName   string             `json:"client_name"`
+	LiveLink     null.String        `json:"live_link,omitempty"`
+	CodeLink     null.String        `json:"code_link"`
+	StartDate    pgtype.Date        `json:"start_date"`
+	EndDate      null.Time          `json:"end_date"`
+	LaunchDate   null.Time          `json:"launch_date"`
+	PublishedAt  null.Time          `json:"published_at"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+	CoverImageID pgtype.UUID        `json:"cover_image_id"`
 }
 
 type ProjectsCategory struct {
-	CategoryID uuid.UUID `json:"category_id"`
-	ProjectID  uuid.UUID `json:"project_id"`
+	CategoryID pgtype.UUID `json:"category_id"`
+	ProjectID  pgtype.UUID `json:"project_id"`
 }
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	UserType  UserType  `json:"user_type"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        pgtype.UUID        `json:"id"`
+	Username  string             `json:"username"`
+	Email     string             `json:"email"`
+	Password  string             `json:"-"`
+	FirstName string             `json:"first_name"`
+	LastName  string             `json:"last_name"`
+	UserType  UserType           `json:"user_type"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 }
 
 type WebsiteConfiguration struct {
-	ID                 uuid.UUID          `json:"id"`
+	ID                 pgtype.UUID        `json:"id"`
 	ConfigurationName  string             `json:"configuration_name"`
 	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
 	Description        null.String        `json:"description"`
-	CreatedAt          time.Time          `json:"created_at"`
-	UpdatedAt          time.Time          `json:"updated_at"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	Active             bool               `json:"active"`
 }

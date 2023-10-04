@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/soramon0/portfolio/src/internal/types"
 	"github.com/soramon0/portfolio/src/lib"
 	"github.com/soramon0/portfolio/src/store"
@@ -48,7 +49,7 @@ func (u *Users) GetUserById(ctx *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid user id"}
 	}
 
-	user, err := u.store.GetUserById(ctx.Context(), id)
+	user, err := u.store.GetUserById(ctx.Context(), pgtype.UUID{Bytes: id, Valid: true})
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &fiber.Error{Code: fiber.StatusNotFound, Message: "user not found"}

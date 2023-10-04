@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/internal/types"
 	"github.com/soramon0/portfolio/src/lib"
@@ -85,9 +87,9 @@ func (a *Auth) Register(c *fiber.Ctx) error {
 	}
 	createdAt := time.Now().UTC()
 	user, err := a.store.CreateUser(c.Context(), database.CreateUserParams{
-		ID:        uuid.New(),
-		CreatedAt: createdAt,
-		UpdatedAt: createdAt,
+		ID:        pgtype.UUID{Bytes: uuid.New(), Valid: true},
+		CreatedAt: pgtype.Timestamptz{Time: createdAt, Valid: true},
+		UpdatedAt: pgtype.Timestamptz{Time: createdAt, Valid: true},
 		Email:     email,
 		Password:  string(password),
 		Username:  username,
@@ -139,7 +141,7 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 	claims := &jwt.RegisteredClaims{
 		IssuedAt:  jwt.NewNumericDate(issuedAt),
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
-		Issuer:    user.ID.String(),
+		Issuer:    fmt.Sprintf("%x-%x-%x-%x-%x", user.ID.Bytes[0:4], user.ID.Bytes[4:6], user.ID.Bytes[6:8], user.ID.Bytes[8:10], user.ID.Bytes[10:16]),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(lib.GetTokenSecret()))

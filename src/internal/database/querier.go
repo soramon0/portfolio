@@ -7,7 +7,7 @@ package database
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
@@ -19,7 +19,7 @@ type Querier interface {
 	CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error)
 	GetPublishedProjectBySlug(ctx context.Context, slug string) (GetPublishedProjectBySlugRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
-	GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error)
+	GetUserById(ctx context.Context, id pgtype.UUID) (GetUserByIdRow, error)
 	GetWebsiteConfigurationByName(ctx context.Context, configurationName string) (WebsiteConfiguration, error)
 	GetWebsiteConfigurations(ctx context.Context) ([]WebsiteConfiguration, error)
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)

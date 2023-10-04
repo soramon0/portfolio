@@ -7,9 +7,8 @@ package database
 
 import (
 	"context"
-	"time"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	null "gopkg.in/guregu/null.v4"
 )
 
@@ -20,9 +19,9 @@ RETURNING id, configuration_name, configuration_value, description, created_at, 
 `
 
 type CreateWebsiteConfigParams struct {
-	ID                 uuid.UUID          `json:"id"`
-	CreatedAt          time.Time          `json:"created_at"`
-	UpdatedAt          time.Time          `json:"updated_at"`
+	ID                 pgtype.UUID        `json:"id"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	ConfigurationName  string             `json:"configuration_name"`
 	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
 	Description        null.String        `json:"description"`
@@ -30,7 +29,7 @@ type CreateWebsiteConfigParams struct {
 }
 
 func (q *Queries) CreateWebsiteConfig(ctx context.Context, arg CreateWebsiteConfigParams) (WebsiteConfiguration, error) {
-	row := q.db.QueryRowContext(ctx, CreateWebsiteConfig,
+	row := q.db.QueryRow(ctx, CreateWebsiteConfig,
 		arg.ID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -57,7 +56,7 @@ SELECT id, configuration_name, configuration_value, description, created_at, upd
 `
 
 func (q *Queries) GetWebsiteConfigurationByName(ctx context.Context, configurationName string) (WebsiteConfiguration, error) {
-	row := q.db.QueryRowContext(ctx, GetWebsiteConfigurationByName, configurationName)
+	row := q.db.QueryRow(ctx, GetWebsiteConfigurationByName, configurationName)
 	var i WebsiteConfiguration
 	err := row.Scan(
 		&i.ID,
@@ -76,7 +75,7 @@ SELECT id, configuration_name, configuration_value, description, created_at, upd
 `
 
 func (q *Queries) GetWebsiteConfigurations(ctx context.Context) ([]WebsiteConfiguration, error) {
-	rows, err := q.db.QueryContext(ctx, GetWebsiteConfigurations)
+	rows, err := q.db.Query(ctx, GetWebsiteConfigurations)
 	if err != nil {
 		return nil, err
 	}
@@ -96,9 +95,6 @@ func (q *Queries) GetWebsiteConfigurations(ctx context.Context) ([]WebsiteConfig
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

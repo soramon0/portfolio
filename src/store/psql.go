@@ -9,8 +9,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/goombaio/namegenerator"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	_ "github.com/lib/pq"
-	"github.com/pressly/goose/v3"
+
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/soramon0/portfolio/src/internal/database"
@@ -34,22 +38,31 @@ type Store interface {
 
 type psqlStore struct {
 	*database.Queries
-	db *sql.DB
+	db   *sql.DB
+	pool *pgxpool.Pool
 }
 
 func NewStore(url string) (Store, error) {
+	pool, err := pgxpool.New(context.Background(), url)
+	if err != nil {
+		return nil, err
+	}
+
 	db, err := sql.Open("postgres", url)
 	if err != nil {
 		return nil, err
 	}
+
 	return &psqlStore{
+		pool:    pool,
 		db:      db,
-		Queries: database.New(db),
+		Queries: database.New(pool),
 	}, nil
 }
 
 func (s *psqlStore) Migrate(dir string, command string, arguments ...string) error {
-	return goose.Run(command, s.db, dir, arguments...)
+	return nil
+	//return goose.Run(command, s.db, dir, arguments...)
 }
 
 func (s *psqlStore) QueryRow(query string, args ...any) *sql.Row {
@@ -61,6 +74,7 @@ func (s *psqlStore) Exec(query string, args ...any) (sql.Result, error) {
 }
 
 func (s *psqlStore) Close() error {
+	s.pool.Close()
 	return s.db.Close()
 }
 
@@ -84,19 +98,19 @@ func (s *psqlStore) GetInitialWebsiteConfigParams() []database.CreateWebsiteConf
 	now := time.Now()
 	return []database.CreateWebsiteConfigParams{
 		{
-			ID:                 uuid.New(),
+			ID:                 pgtype.UUID{Bytes: uuid.New(), Valid: true},
 			Active:             true,
-			CreatedAt:          now,
-			UpdatedAt:          now,
+			CreatedAt:          pgtype.Timestamptz{Time: now, Valid: true},
+			UpdatedAt:          pgtype.Timestamptz{Time: now, Valid: true},
 			Description:        null.NewString("", false),
 			ConfigurationName:  "allow_user_login",
 			ConfigurationValue: database.WebsiteConfigValueDisallow,
 		},
 		{
-			ID:                 uuid.New(),
+			ID:                 pgtype.UUID{Bytes: uuid.New(), Valid: true},
 			Active:             true,
-			CreatedAt:          now,
-			UpdatedAt:          now,
+			CreatedAt:          pgtype.Timestamptz{Time: now, Valid: true},
+			UpdatedAt:          pgtype.Timestamptz{Time: now, Valid: true},
 			Description:        null.NewString("", false),
 			ConfigurationName:  "allow_user_register",
 			ConfigurationValue: database.WebsiteConfigValueDisallow,
@@ -109,16 +123,16 @@ func (s *psqlStore) CreateInitialWebsiteConfigs(ctx context.Context, cfgs []data
 		return fmt.Errorf("website configurations cannot be empty")
 	}
 
-	tx, err := s.db.Begin()
+	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer tx.Rollback(ctx)
 	qtx := s.Queries.WithTx(tx)
 
 	for _, c := range cfgs {
 		_, err := qtx.GetWebsiteConfigurationByName(ctx, c.ConfigurationName)
-		if err != sql.ErrNoRows {
+		if err != pgx.ErrNoRows {
 			return err
 		}
 
@@ -127,5 +141,5 @@ func (s *psqlStore) CreateInitialWebsiteConfigs(ctx context.Context, cfgs []data
 		}
 	}
 
-	return tx.Commit()
+	return tx.Commit(ctx)
 }

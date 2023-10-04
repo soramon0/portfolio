@@ -7,9 +7,8 @@ package database
 
 import (
 	"context"
-	"time"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const CheckUserExistsByEmail = `-- name: CheckUserExistsByEmail :one
@@ -19,7 +18,7 @@ SELECT EXISTS (
 `
 
 func (q *Queries) CheckUserExistsByEmail(ctx context.Context, email string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, CheckUserExistsByEmail, email)
+	row := q.db.QueryRow(ctx, CheckUserExistsByEmail, email)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -32,7 +31,7 @@ SELECT EXISTS (
 `
 
 func (q *Queries) CheckUserExistsByUsername(ctx context.Context, username string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, CheckUserExistsByUsername, username)
+	row := q.db.QueryRow(ctx, CheckUserExistsByUsername, username)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
@@ -45,19 +44,19 @@ RETURNING id, username, email, password, first_name, last_name, user_type, creat
 `
 
 type CreateUserParams struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	UserType  UserType  `json:"user_type"`
+	ID        pgtype.UUID        `json:"id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	Username  string             `json:"username"`
+	Email     string             `json:"email"`
+	Password  string             `json:"-"`
+	FirstName string             `json:"first_name"`
+	LastName  string             `json:"last_name"`
+	UserType  UserType           `json:"user_type"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, CreateUser,
+	row := q.db.QueryRow(ctx, CreateUser,
 		arg.ID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -88,7 +87,7 @@ SELECT id, username, email, password, first_name, last_name, user_type, created_
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRowContext(ctx, GetUserByEmail, email)
+	row := q.db.QueryRow(ctx, GetUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -109,16 +108,16 @@ SELECT id, username, email, created_at, updated_at, user_type FROM users WHERE i
 `
 
 type GetUserByIdRow struct {
-	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	UserType  UserType  `json:"user_type"`
+	ID        pgtype.UUID        `json:"id"`
+	Username  string             `json:"username"`
+	Email     string             `json:"email"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	UserType  UserType           `json:"user_type"`
 }
 
-func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow, error) {
-	row := q.db.QueryRowContext(ctx, GetUserById, id)
+func (q *Queries) GetUserById(ctx context.Context, id pgtype.UUID) (GetUserByIdRow, error) {
+	row := q.db.QueryRow(ctx, GetUserById, id)
 	var i GetUserByIdRow
 	err := row.Scan(
 		&i.ID,
@@ -136,7 +135,7 @@ SELECT id, username, email, password, first_name, last_name, user_type, created_
 `
 
 func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, ListUsers)
+	rows, err := q.db.Query(ctx, ListUsers)
 	if err != nil {
 		return nil, err
 	}
@@ -158,9 +157,6 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
