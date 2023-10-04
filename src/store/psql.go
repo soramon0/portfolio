@@ -12,6 +12,8 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
 
 	"github.com/soramon0/portfolio/src/internal/database"
 )
@@ -49,8 +51,12 @@ func NewStore(url string) (Store, error) {
 }
 
 func (s *psqlStore) Migrate(dir string, command string, arguments ...string) error {
-	return nil
-	//return goose.Run(command, s.db, dir, arguments...)
+	db := stdlib.OpenDB(*s.pool.Config().ConnConfig)
+
+	// May need to configure the max idle conns
+	// Link: https://github.com/jackc/pgx/blob/163eb68866a76a9cf6a15500303725aac32f6ca3/stdlib/sql.go#L230
+	// db.SetMaxIdleConns(0)
+	return goose.Run(command, db, dir, arguments...)
 }
 
 func (s *psqlStore) QueryRow(query string, args ...any) pgx.Row {
