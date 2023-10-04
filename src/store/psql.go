@@ -12,7 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"gopkg.in/guregu/null.v4"
 
 	"github.com/soramon0/portfolio/src/internal/database"
 )
@@ -90,7 +89,7 @@ func (s *psqlStore) GetInitialWebsiteConfigParams() []database.CreateWebsiteConf
 			Active:             true,
 			CreatedAt:          pgtype.Timestamptz{Time: now, Valid: true},
 			UpdatedAt:          pgtype.Timestamptz{Time: now, Valid: true},
-			Description:        null.NewString("", false),
+			Description:        pgtype.Text{String: "", Valid: false},
 			ConfigurationName:  "allow_user_login",
 			ConfigurationValue: database.WebsiteConfigValueDisallow,
 		},
@@ -99,7 +98,7 @@ func (s *psqlStore) GetInitialWebsiteConfigParams() []database.CreateWebsiteConf
 			Active:             true,
 			CreatedAt:          pgtype.Timestamptz{Time: now, Valid: true},
 			UpdatedAt:          pgtype.Timestamptz{Time: now, Valid: true},
-			Description:        null.NewString("", false),
+			Description:        pgtype.Text{String: "", Valid: false},
 			ConfigurationName:  "allow_user_register",
 			ConfigurationValue: database.WebsiteConfigValueDisallow,
 		},

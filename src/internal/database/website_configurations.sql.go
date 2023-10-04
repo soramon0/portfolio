@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	null "gopkg.in/guregu/null.v4"
 )
 
 const CreateWebsiteConfig = `-- name: CreateWebsiteConfig :one
@@ -24,7 +23,7 @@ type CreateWebsiteConfigParams struct {
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	ConfigurationName  string             `json:"configuration_name"`
 	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
-	Description        null.String        `json:"description"`
+	Description        pgtype.Text        `json:"description"`
 	Active             bool               `json:"active"`
 }
 

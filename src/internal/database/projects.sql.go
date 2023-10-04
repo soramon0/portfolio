@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	null "gopkg.in/guregu/null.v4"
 )
 
 const CountPublishedProjects = `-- name: CountPublishedProjects :one
@@ -84,18 +83,18 @@ type GetPublishedProjectBySlugRow struct {
 	Slug           string             `json:"slug"`
 	Subtitle       string             `json:"subtitle"`
 	Description    string             `json:"description"`
-	LiveLink       null.String        `json:"live_link,omitempty"`
-	CodeLink       null.String        `json:"code_link"`
+	LiveLink       pgtype.Text        `json:"live_link,omitempty"`
+	CodeLink       pgtype.Text        `json:"code_link"`
 	StartDate      pgtype.Date        `json:"start_date"`
 	Technologies   []string           `json:"technologies"`
 	Credits        []string           `json:"credits"`
-	EndDate        null.Time          `json:"end_date"`
-	LaunchDate     null.Time          `json:"launch_date"`
+	EndDate        pgtype.Date        `json:"end_date"`
+	LaunchDate     pgtype.Date        `json:"launch_date"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	CoverImageName null.String        `json:"cover_image_name"`
-	CoverImageUrl  null.String        `json:"cover_image_url"`
-	CoverImageAlt  null.String        `json:"cover_image_alt"`
+	CoverImageName pgtype.Text        `json:"cover_image_name"`
+	CoverImageUrl  pgtype.Text        `json:"cover_image_url"`
+	CoverImageAlt  pgtype.Text        `json:"cover_image_alt"`
 	Categories     interface{}        `json:"categories"`
 	Gallery        interface{}        `json:"gallery"`
 }
@@ -164,9 +163,9 @@ type ListPublishedProjectsRow struct {
 	Slug           string      `json:"slug"`
 	Subtitle       string      `json:"subtitle"`
 	StartDate      pgtype.Date `json:"start_date"`
-	CoverImageName null.String `json:"cover_image_name"`
-	CoverImageUrl  null.String `json:"cover_image_url"`
-	CoverImageAlt  null.String `json:"cover_image_alt"`
+	CoverImageName pgtype.Text `json:"cover_image_name"`
+	CoverImageUrl  pgtype.Text `json:"cover_image_url"`
+	CoverImageAlt  pgtype.Text `json:"cover_image_alt"`
 }
 
 func (q *Queries) ListPublishedProjects(ctx context.Context, arg ListPublishedProjectsParams) ([]ListPublishedProjectsRow, error) {

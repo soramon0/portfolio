@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	null "gopkg.in/guregu/null.v4"
 )
 
 type FileType string
@@ -149,7 +148,7 @@ type File struct {
 	ID         pgtype.UUID        `json:"id"`
 	Url        string             `json:"url"`
 	Alt        string             `json:"alt"`
-	Name       null.String        `json:"name"`
+	Name       pgtype.Text        `json:"name"`
 	Type       FileType           `json:"type"`
 	UploadedAt pgtype.Timestamptz `json:"uploaded_at"`
 	ProjectID  pgtype.UUID        `json:"project_id"`
@@ -164,12 +163,12 @@ type Project struct {
 	Technologies []string           `json:"technologies"`
 	Credits      []string           `json:"credits"`
 	ClientName   string             `json:"client_name"`
-	LiveLink     null.String        `json:"live_link,omitempty"`
-	CodeLink     null.String        `json:"code_link"`
+	LiveLink     pgtype.Text        `json:"live_link,omitempty"`
+	CodeLink     pgtype.Text        `json:"code_link"`
 	StartDate    pgtype.Date        `json:"start_date"`
-	EndDate      null.Time          `json:"end_date"`
-	LaunchDate   null.Time          `json:"launch_date"`
-	PublishedAt  null.Time          `json:"published_at"`
+	EndDate      pgtype.Date        `json:"end_date"`
+	LaunchDate   pgtype.Date        `json:"launch_date"`
+	PublishedAt  pgtype.Date        `json:"published_at"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
 	CoverImageID pgtype.UUID        `json:"cover_image_id"`
@@ -196,7 +195,7 @@ type WebsiteConfiguration struct {
 	ID                 pgtype.UUID        `json:"id"`
 	ConfigurationName  string             `json:"configuration_name"`
 	ConfigurationValue WebsiteConfigValue `json:"configuration_value"`
-	Description        null.String        `json:"description"`
+	Description        pgtype.Text        `json:"description"`
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
 	Active             bool               `json:"active"`
