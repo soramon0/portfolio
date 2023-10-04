@@ -28,7 +28,7 @@ func NewProjects(s store.Store, l *lib.AppLogger) *Projects {
 
 func (p *Projects) GetProjectBySlug(c *fiber.Ctx) error {
 	slug := strings.ToLower(c.Params("slug"))
-	project, err := p.store.GetPublishedProject(c.Context(), slug)
+	project, err := p.store.GetPublishedProjectBySlug(c.Context(), slug)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &fiber.Error{Code: fiber.StatusNotFound, Message: "project not found"}

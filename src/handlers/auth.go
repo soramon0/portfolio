@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/internal/types"
 	"github.com/soramon0/portfolio/src/lib"
@@ -85,9 +86,9 @@ func (a *Auth) Register(c *fiber.Ctx) error {
 	}
 	createdAt := time.Now().UTC()
 	user, err := a.store.CreateUser(c.Context(), database.CreateUserParams{
-		ID:        uuid.New(),
-		CreatedAt: createdAt,
-		UpdatedAt: createdAt,
+		ID:        pgtype.UUID{Bytes: uuid.New(), Valid: true},
+		CreatedAt: pgtype.Timestamptz{Time: createdAt, Valid: true},
+		UpdatedAt: pgtype.Timestamptz{Time: createdAt, Valid: true},
 		Email:     email,
 		Password:  string(password),
 		Username:  username,
@@ -134,12 +135,18 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid credentials"}
 	}
 
+	id, err := uuid.FromBytes(user.ID.Bytes[:])
+	if err != nil {
+		a.log.Infof("failed to parse user id: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "login failed"}
+	}
+
 	issuedAt := time.Now()
 	expiresAt := issuedAt.Add(24 * time.Hour)
 	claims := &jwt.RegisteredClaims{
 		IssuedAt:  jwt.NewNumericDate(issuedAt),
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
-		Issuer:    user.ID.String(),
+		Issuer:    id.String(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(lib.GetTokenSecret()))

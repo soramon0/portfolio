@@ -7,11 +7,8 @@ package database
 
 import (
 	"context"
-	"time"
 
-	"github.com/google/uuid"
-	"github.com/lib/pq"
-	null "gopkg.in/guregu/null.v4"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const CountPublishedProjects = `-- name: CountPublishedProjects :one
@@ -20,7 +17,7 @@ WHERE published_at IS NOT NULL
 `
 
 func (q *Queries) CountPublishedProjects(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, CountPublishedProjects)
+	row := q.db.QueryRow(ctx, CountPublishedProjects)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -46,7 +43,7 @@ SELECT
   f.name AS cover_image_name,
   f.url AS cover_image_url,
   f.alt AS cover_image_alt,
-  ARRAY_AGG(categories.name) AS categories,
+  ARRAY_REMOVE(ARRAY_AGG(categories.name), NULL) AS categories,
   COALESCE(
     (
       SELECT 
@@ -80,30 +77,30 @@ GROUP BY
 `
 
 type GetPublishedProjectBySlugRow struct {
-	ID             uuid.UUID   `json:"id"`
-	ClientName     string      `json:"client_name"`
-	Name           string      `json:"name"`
-	Slug           string      `json:"slug"`
-	Subtitle       string      `json:"subtitle"`
-	Description    string      `json:"description"`
-	LiveLink       null.String `json:"live_link,omitempty"`
-	CodeLink       null.String `json:"code_link"`
-	StartDate      time.Time   `json:"start_date"`
-	Technologies   []string    `json:"technologies"`
-	Credits        []string    `json:"credits"`
-	EndDate        null.Time   `json:"end_date"`
-	LaunchDate     null.Time   `json:"launch_date"`
-	CreatedAt      time.Time   `json:"created_at"`
-	UpdatedAt      time.Time   `json:"updated_at"`
-	CoverImageName null.String `json:"cover_image_name"`
-	CoverImageUrl  null.String `json:"cover_image_url"`
-	CoverImageAlt  null.String `json:"cover_image_alt"`
-	Categories     interface{} `json:"categories"`
-	Gallery        interface{} `json:"gallery"`
+	ID             pgtype.UUID        `json:"id"`
+	ClientName     string             `json:"client_name"`
+	Name           string             `json:"name"`
+	Slug           string             `json:"slug"`
+	Subtitle       string             `json:"subtitle"`
+	Description    string             `json:"description"`
+	LiveLink       pgtype.Text        `json:"live_link,omitempty"`
+	CodeLink       pgtype.Text        `json:"code_link"`
+	StartDate      pgtype.Date        `json:"start_date"`
+	Technologies   []string           `json:"technologies"`
+	Credits        []string           `json:"credits"`
+	EndDate        pgtype.Date        `json:"end_date"`
+	LaunchDate     pgtype.Date        `json:"launch_date"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	CoverImageName pgtype.Text        `json:"cover_image_name"`
+	CoverImageUrl  pgtype.Text        `json:"cover_image_url"`
+	CoverImageAlt  pgtype.Text        `json:"cover_image_alt"`
+	Categories     interface{}        `json:"categories"`
+	Gallery        interface{}        `json:"gallery"`
 }
 
 func (q *Queries) GetPublishedProjectBySlug(ctx context.Context, slug string) (GetPublishedProjectBySlugRow, error) {
-	row := q.db.QueryRowContext(ctx, GetPublishedProjectBySlug, slug)
+	row := q.db.QueryRow(ctx, GetPublishedProjectBySlug, slug)
 	var i GetPublishedProjectBySlugRow
 	err := row.Scan(
 		&i.ID,
@@ -115,8 +112,8 @@ func (q *Queries) GetPublishedProjectBySlug(ctx context.Context, slug string) (G
 		&i.LiveLink,
 		&i.CodeLink,
 		&i.StartDate,
-		pq.Array(&i.Technologies),
-		pq.Array(&i.Credits),
+		&i.Technologies,
+		&i.Credits,
 		&i.EndDate,
 		&i.LaunchDate,
 		&i.CreatedAt,
@@ -160,19 +157,19 @@ type ListPublishedProjectsParams struct {
 }
 
 type ListPublishedProjectsRow struct {
-	ID             uuid.UUID   `json:"id"`
+	ID             pgtype.UUID `json:"id"`
 	ClientName     string      `json:"client_name"`
 	Name           string      `json:"name"`
 	Slug           string      `json:"slug"`
 	Subtitle       string      `json:"subtitle"`
-	StartDate      time.Time   `json:"start_date"`
-	CoverImageName null.String `json:"cover_image_name"`
-	CoverImageUrl  null.String `json:"cover_image_url"`
-	CoverImageAlt  null.String `json:"cover_image_alt"`
+	StartDate      pgtype.Date `json:"start_date"`
+	CoverImageName pgtype.Text `json:"cover_image_name"`
+	CoverImageUrl  pgtype.Text `json:"cover_image_url"`
+	CoverImageAlt  pgtype.Text `json:"cover_image_alt"`
 }
 
 func (q *Queries) ListPublishedProjects(ctx context.Context, arg ListPublishedProjectsParams) ([]ListPublishedProjectsRow, error) {
-	rows, err := q.db.QueryContext(ctx, ListPublishedProjects, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, ListPublishedProjects, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -194,9 +191,6 @@ func (q *Queries) ListPublishedProjects(ctx context.Context, arg ListPublishedPr
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/lib"
 	"github.com/soramon0/portfolio/src/store"
@@ -108,9 +109,9 @@ func newAdminCommand() *cli.Command {
 
 					createdAt := time.Now().UTC()
 					_, err = db.CreateUser(context.Background(), database.CreateUserParams{
-						ID:        uuid.New(),
-						CreatedAt: createdAt,
-						UpdatedAt: createdAt,
+						ID:        pgtype.UUID{Bytes: uuid.New(), Valid: true},
+						CreatedAt: pgtype.Timestamptz{Time: createdAt, Valid: true},
+						UpdatedAt: pgtype.Timestamptz{Time: createdAt, Valid: true},
 						UserType:  database.UserTypeAdmin,
 						Email:     strings.Trim(strings.ToLower(payload.Email), " "),
 						Password:  string(password),
@@ -152,7 +153,8 @@ func newAdminCommand() *cli.Command {
 					if !exists {
 						return errors.New("no admin found")
 					}
-					return db.QueryRow("DELETE FROM users where user_type = 'admin' AND id = $1;", id.String()).Err()
+					_, err = db.Exec("DELETE FROM users where user_type = 'admin' AND id = $1;", id.String())
+					return err
 				},
 			},
 		},

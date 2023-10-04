@@ -10,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/soramon0/portfolio/src/cache"
 	"github.com/soramon0/portfolio/src/internal/database"
 	"github.com/soramon0/portfolio/src/lib"
@@ -83,7 +84,7 @@ func (m *Middleware) WithAuthenticatedUser(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthenticated"}
 	}
 
-	user, err := m.store.GetUserById(c.Context(), userId)
+	user, err := m.store.GetUserById(c.Context(), pgtype.UUID{Bytes: userId, Valid: true})
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return &fiber.Error{Code: fiber.StatusUnauthorized, Message: "unauthenticated"}

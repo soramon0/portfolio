@@ -14,7 +14,7 @@ SELECT count(*) FROM categories
 `
 
 func (q *Queries) CountCategories(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, CountCategories)
+	row := q.db.QueryRow(ctx, CountCategories)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -31,7 +31,7 @@ type ListCategoriesParams struct {
 }
 
 func (q *Queries) ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error) {
-	rows, err := q.db.QueryContext(ctx, ListCategories, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, ListCategories, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -48,9 +48,6 @@ func (q *Queries) ListCategories(ctx context.Context, arg ListCategoriesParams) 
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
