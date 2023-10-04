@@ -52,6 +52,7 @@ func NewStore(url string) (Store, error) {
 
 func (s *psqlStore) Migrate(dir string, command string, arguments ...string) error {
 	db := stdlib.OpenDB(*s.pool.Config().ConnConfig)
+	defer db.Close()
 
 	// May need to configure the max idle conns
 	// Link: https://github.com/jackc/pgx/blob/163eb68866a76a9cf6a15500303725aac32f6ca3/stdlib/sql.go#L230
