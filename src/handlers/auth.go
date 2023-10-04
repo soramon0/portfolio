@@ -3,7 +3,6 @@ package handlers
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -136,12 +135,18 @@ func (a *Auth) Login(c *fiber.Ctx) error {
 		return &fiber.Error{Code: fiber.StatusBadRequest, Message: "invalid credentials"}
 	}
 
+	id, err := uuid.FromBytes(user.ID.Bytes[:])
+	if err != nil {
+		a.log.Infof("failed to parse user id: %v\n", err)
+		return &fiber.Error{Code: fiber.StatusInternalServerError, Message: "login failed"}
+	}
+
 	issuedAt := time.Now()
 	expiresAt := issuedAt.Add(24 * time.Hour)
 	claims := &jwt.RegisteredClaims{
 		IssuedAt:  jwt.NewNumericDate(issuedAt),
 		ExpiresAt: jwt.NewNumericDate(expiresAt),
-		Issuer:    fmt.Sprintf("%x-%x-%x-%x-%x", user.ID.Bytes[0:4], user.ID.Bytes[4:6], user.ID.Bytes[6:8], user.ID.Bytes[8:10], user.ID.Bytes[10:16]),
+		Issuer:    id.String(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(lib.GetTokenSecret()))
