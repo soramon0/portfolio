@@ -43,7 +43,7 @@ SELECT
   f.name AS cover_image_name,
   f.url AS cover_image_url,
   f.alt AS cover_image_alt,
-  ARRAY_AGG(categories.name) AS categories,
+  ARRAY_REMOVE(ARRAY_AGG(categories.name), NULL) AS categories,
   COALESCE(
     (
       SELECT 
