@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -10,11 +9,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/goombaio/namegenerator"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-
-	_ "github.com/lib/pq"
-
 	"gopkg.in/guregu/null.v4"
 
 	"github.com/soramon0/portfolio/src/internal/database"
@@ -24,21 +21,19 @@ type Store interface {
 	database.Querier
 
 	// used db management cases
-	QueryRow(query string, args ...any) *sql.Row
-	Exec(query string, args ...any) (sql.Result, error)
-	Close() error
+	QueryRow(query string, args ...any) pgx.Row
+	Exec(query string, args ...any) (pgconn.CommandTag, error)
+	Close()
 	Migrate(dir string, command string, arguments ...string) error
 
 	// business related methods
 	GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error)
 	CreateInitialWebsiteConfigs(ctx context.Context, configs []database.CreateWebsiteConfigParams) error
 	GetInitialWebsiteConfigParams() []database.CreateWebsiteConfigParams
-	GetPublishedProject(ctx context.Context, slug string) (ProjectWithGallary, error)
 }
 
 type psqlStore struct {
 	*database.Queries
-	db   *sql.DB
 	pool *pgxpool.Pool
 }
 
@@ -48,14 +43,8 @@ func NewStore(url string) (Store, error) {
 		return nil, err
 	}
 
-	db, err := sql.Open("postgres", url)
-	if err != nil {
-		return nil, err
-	}
-
 	return &psqlStore{
 		pool:    pool,
-		db:      db,
 		Queries: database.New(pool),
 	}, nil
 }
@@ -65,17 +54,16 @@ func (s *psqlStore) Migrate(dir string, command string, arguments ...string) err
 	//return goose.Run(command, s.db, dir, arguments...)
 }
 
-func (s *psqlStore) QueryRow(query string, args ...any) *sql.Row {
-	return s.db.QueryRow(query, args...)
+func (s *psqlStore) QueryRow(query string, args ...any) pgx.Row {
+	return s.pool.QueryRow(context.Background(), query, args...)
 }
 
-func (s *psqlStore) Exec(query string, args ...any) (sql.Result, error) {
-	return s.db.Exec(query, args...)
+func (s *psqlStore) Exec(query string, args ...any) (pgconn.CommandTag, error) {
+	return s.pool.Exec(context.Background(), query, args...)
 }
 
-func (s *psqlStore) Close() error {
+func (s *psqlStore) Close() {
 	s.pool.Close()
-	return s.db.Close()
 }
 
 func (s *psqlStore) GenerateUniqueUsername(ctx context.Context, retryCount int) (string, error) {

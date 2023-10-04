@@ -26,11 +26,8 @@ func main() {
 	if err != nil {
 		logger.ErrorFatalF("could not connect to postgres: %v", err)
 	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			logger.ErrorFatalF("failed to close db connection: %v", err)
-		}
-	}()
+	defer db.Close()
+
 	if err := db.Migrate("./src/sql/schema", "up"); err != nil {
 		logger.ErrorFatalF("failed to migrate db: %v", err)
 	}

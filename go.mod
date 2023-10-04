@@ -12,7 +12,6 @@ require (
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/joho/godotenv v1.5.1
-	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/urfave/cli/v2 v2.25.7
 	golang.org/x/crypto v0.12.0

@@ -41,11 +41,7 @@ func TestCreateUsers(t *testing.T) {
 	teardown := func(t *testing.T, db store.Store) {
 		t.Helper()
 
-		defer func() {
-			if err := db.Close(); err != nil {
-				t.Fatal("failed to close db connection: ", err)
-			}
-		}()
+		defer db.Close()
 
 		if err := db.Migrate("../sql/schema/", "down"); err != nil {
 			t.Fatal("failed to migrate db down: ", err)

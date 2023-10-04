@@ -153,7 +153,8 @@ func newAdminCommand() *cli.Command {
 					if !exists {
 						return errors.New("no admin found")
 					}
-					return db.QueryRow("DELETE FROM users where user_type = 'admin' AND id = $1;", id.String()).Err()
+					_, err = db.Exec("DELETE FROM users where user_type = 'admin' AND id = $1;", id.String())
+					return err
 				},
 			},
 		},
